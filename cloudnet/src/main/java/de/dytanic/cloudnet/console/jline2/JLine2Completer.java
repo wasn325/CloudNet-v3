@@ -1,4 +1,4 @@
-package de.dytanic.cloudnet.console;
+package de.dytanic.cloudnet.console.jline2;
 
 import de.dytanic.cloudnet.command.ITabCompleter;
 import de.dytanic.cloudnet.common.Properties;

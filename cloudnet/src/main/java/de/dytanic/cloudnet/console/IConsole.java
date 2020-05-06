@@ -26,6 +26,12 @@ public interface IConsole extends AutoCloseable {
         return this.hasColorSupport();
     }
 
+    boolean hasKeyListenerSupport();
+
+    void addKeyListener(UUID uniqueId, KeyListener listener);
+
+    void removeKeyListener(UUID uniqueId);
+
     List<String> getCommandHistory();
 
     void setCommandHistory(List<String> history);

@@ -1,10 +1,14 @@
-package de.dytanic.cloudnet.console;
+package de.dytanic.cloudnet.console.jline2;
 
 import com.google.common.base.Preconditions;
 import de.dytanic.cloudnet.CloudNet;
 import de.dytanic.cloudnet.command.ITabCompleter;
 import de.dytanic.cloudnet.common.concurrent.ITask;
 import de.dytanic.cloudnet.common.concurrent.ListenableTask;
+import de.dytanic.cloudnet.console.ConsoleColor;
+import de.dytanic.cloudnet.console.ConsoleHandler;
+import de.dytanic.cloudnet.console.IConsole;
+import de.dytanic.cloudnet.console.KeyListener;
 import de.dytanic.cloudnet.console.animation.AbstractConsoleAnimation;
 import jline.console.ConsoleReader;
 import jline.console.history.History;
@@ -23,7 +27,7 @@ import java.util.stream.Collectors;
 
 public final class JLine2Console implements IConsole {
 
-    private final ConsoleReader consoleReader;
+    private final ListenableConsoleReader consoleReader;
 
     private final String
             user = System.getProperty("user.name"),
@@ -44,7 +48,7 @@ public final class JLine2Console implements IConsole {
     public JLine2Console() throws Exception {
         AnsiConsole.systemInstall();
 
-        this.consoleReader = new ConsoleReader();
+        this.consoleReader = new ListenableConsoleReader();
         this.consoleReader.setExpandEvents(false);
 
         this.consoleReader.addCompleter(new JLine2Completer(this));
@@ -118,6 +122,21 @@ public final class JLine2Console implements IConsole {
     @Override
     public boolean isPrintingEnabled() {
         return this.printingEnabled;
+    }
+
+    @Override
+    public boolean hasKeyListenerSupport() {
+        return true;
+    }
+
+    @Override
+    public void addKeyListener(UUID uniqueId, KeyListener listener) {
+        this.consoleReader.getListeners().put(uniqueId, listener);
+    }
+
+    @Override
+    public void removeKeyListener(UUID uniqueId) {
+        this.consoleReader.getListeners().remove(uniqueId);
     }
 
     @Override

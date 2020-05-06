@@ -4,7 +4,7 @@ import de.dytanic.cloudnet.common.language.LanguageManager;
 import de.dytanic.cloudnet.common.logging.*;
 import de.dytanic.cloudnet.console.ConsoleLogHandler;
 import de.dytanic.cloudnet.console.IConsole;
-import de.dytanic.cloudnet.console.JLine2Console;
+import de.dytanic.cloudnet.console.jline2.JLine2Console;
 import de.dytanic.cloudnet.console.log.ColouredLogFormatter;
 
 import java.io.File;
