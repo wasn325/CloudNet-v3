@@ -1,8 +1,6 @@
 package de.dytanic.cloudnet.console.animation.questionlist;
 
 import de.dytanic.cloudnet.CloudNet;
-import de.dytanic.cloudnet.common.concurrent.ITask;
-import de.dytanic.cloudnet.common.concurrent.ListenableTask;
 import de.dytanic.cloudnet.common.language.LanguageManager;
 import de.dytanic.cloudnet.console.IConsole;
 import de.dytanic.cloudnet.console.animation.AbstractConsoleAnimation;
@@ -10,9 +8,9 @@ import de.dytanic.cloudnet.event.setup.SetupCancelledEvent;
 import de.dytanic.cloudnet.event.setup.SetupCompleteEvent;
 import de.dytanic.cloudnet.event.setup.SetupInitiateEvent;
 import de.dytanic.cloudnet.event.setup.SetupResponseEvent;
-import org.fusesource.jansi.Ansi;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
@@ -149,7 +147,6 @@ public class ConsoleQuestionListAnimation extends AbstractConsoleAnimation {
         console.disableAllHandlers();
 
         CloudNet.getInstance().getEventManager().callEvent(new SetupInitiateEvent(this));
-
     }
 
     @Override
@@ -160,107 +157,43 @@ public class ConsoleQuestionListAnimation extends AbstractConsoleAnimation {
             return true;
         }
 
-        QuestionAnswerType<?> answerType = entry.getAnswerType();
-
-        this.setDefaultConsoleValues(answerType);
-
-        String possibleAnswers = answerType.getPossibleAnswersAsString();
-        if (possibleAnswers != null) {
-            for (String line : this.updateCursor("&r" + entry.getQuestion()
-                    + " &r> &e" + LanguageManager.getMessage("ca-question-list-possible-answers-list").replace("%values%", possibleAnswers))) {
-                super.getConsole().forceWriteLine("&e" + line);
+        entry.getSelector().setConsole(super.getConsole());
+        entry.getSelector().setResultTester(input -> {
+            if (this.isCancellable() && input.equalsIgnoreCase("cancel")) {
+                this.cancelled = true;
+                this.entries.clear();
+                return false;
             }
-        } else {
-            for (String line : this.updateCursor("&r" + entry.getQuestion())) {
-                super.getConsole().forceWriteLine(line);
-            }
-        }
-
-
-        ITask<Void> task = new ListenableTask<>(() -> null);
-        UUID handlerId = UUID.randomUUID();
-
-        super.getConsole().addCommandHandler(handlerId, input -> {
-            if (this.validateInput(answerType, entry, input)) {
-                if (this.entries.isEmpty()) {
-                    this.resetConsole();
-                }
-
-                super.getConsole().removeCommandHandler(handlerId);
-                try {
-                    task.call();
-                } catch (Exception exception) {
-                    exception.printStackTrace();
-                }
-            }
+            return true;
         });
 
-        try {
-            task.get();
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
-
-        return false;
-    }
-
-    private boolean validateInput(QuestionAnswerType<?> answerType, QuestionListEntry<?> entry, String input) {
-        if (this.isCancellable() && input.equalsIgnoreCase("cancel")) {
-            this.cancelled = true;
-            this.entries.clear();
-
-            return true;
-        }
-
-        if (answerType.isValidInput(input)) {
-            Object result = answerType.parse(input);
-            this.results.put(entry.getKey(), result);
-            for (BiConsumer<QuestionListEntry<?>, Object> listener : this.entryCompletionListeners) {
-                listener.accept(entry, result);
-            }
-
-            CloudNet.getInstance().getEventManager().callEvent(new SetupResponseEvent(this, entry, result));
-
-            super.getConsole().writeRaw( //print result message and remove question
-                    this.eraseLines(Ansi.ansi().reset(), this.currentCursor + 1)
-                            .a("&r").a(entry.getQuestion())
-                            .a(" &r> &a").a(input)
-                            .a(System.lineSeparator())
-                            .toString()
-            );
-
-            return true;
-        }
-
-        try {
-            super.eraseLastLine(); //erase prompt
-
-            String[] lines = answerType.getInvalidInputMessage(input).split(System.lineSeparator());
-            for (String line : lines) {
-                super.getConsole().forceWriteLine("&c" + line);
-            }
-
-            Thread.sleep(3000);
-
-            super.getConsole().writeRaw(this.eraseLines(Ansi.ansi().reset(), lines.length).toString()); //erase invalid input message
-
-            super.getConsole().setCommandHistory(answerType.getCompletableAnswers());
-        } catch (InterruptedException exception) {
-            exception.printStackTrace();
-        }
-
-        return false;
-    }
-
-    private void setDefaultConsoleValues(QuestionAnswerType<?> answerType) {
-        super.getConsole().setCommandHistory(answerType.getCompletableAnswers());
-
-        String recommendation = answerType.getRecommendation();
-        if (recommendation != null) {
-            super.getConsole().setCommandInputValue(recommendation);
-        }
-
         super.getConsole().togglePrinting(false);
+        entry.getSelector().init();
+
+        UUID listenerId = UUID.randomUUID();
+
+        super.getConsole().addKeyListener(listenerId, entry.getSelector());
+
+        try {
+            entry.getSelector().getCompletionHandler().get();
+        } catch (InterruptedException | ExecutionException exception) {
+            exception.printStackTrace();
+        }
+
+        super.getConsole().removeKeyListener(listenerId);
+
+        if (this.entries.isEmpty()) {
+            this.resetConsole();
+        }
+
+        this.results.put(entry.getKey(), entry.getSelector().getResult());
+        for (BiConsumer<QuestionListEntry<?>, Object> listener : this.entryCompletionListeners) {
+            listener.accept(entry, entry.getSelector().getResult());
+        }
+
+        CloudNet.getInstance().getEventManager().callEvent(new SetupResponseEvent(this, entry, entry.getSelector().getResult()));
+
+        return false;
     }
 
     private void resetConsole() {
@@ -294,27 +227,6 @@ public class ConsoleQuestionListAnimation extends AbstractConsoleAnimation {
         super.getConsole().togglePrinting(this.previousPrintingEnabled);
         super.getConsole().setPrompt(this.previousPrompt);
         super.getConsole().setCommandHistory(this.previousHistory);
-    }
-
-    private String[] updateCursor(String... texts) {
-        Collection<String> result = new ArrayList<>(texts.length);
-        int length = 0;
-        for (String text : texts) {
-            for (String line : text.split(System.lineSeparator())) {
-                ++length;
-                result.add(line);
-            }
-        }
-        this.currentCursor = length;
-        return result.toArray(new String[0]);
-    }
-
-    private Ansi eraseLines(Ansi ansi, int count) {
-        for (int i = 0; i < count; i++) {
-            ansi.cursorUp(1);
-            ansi.eraseLine();
-        }
-        return ansi;
     }
 
 }

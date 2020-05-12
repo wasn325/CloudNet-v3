@@ -1,5 +1,7 @@
 package de.dytanic.cloudnet.console.jline2;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import de.dytanic.cloudnet.console.KeyListener;
 import jline.console.ConsoleReader;
 import jline.console.KeyMap;
@@ -13,7 +15,7 @@ import java.util.UUID;
 
 public class ListenableConsoleReader extends ConsoleReader {
 
-    private static final Map<Operation, KeyListener.InputAction> ACTION_MAP = new HashMap<>();
+    private static final BiMap<Operation, KeyListener.InputAction> ACTION_MAP = HashBiMap.create();
 
     static {
         ACTION_MAP.put(Operation.PREVIOUS_HISTORY, KeyListener.InputAction.ARROW_UP);
@@ -68,18 +70,20 @@ public class ListenableConsoleReader extends ConsoleReader {
                 c = opBuffer.codePointBefore(opBuffer.length());
             }
 
-            boolean cancel = false;
+            KeyListener.InputAction newAction = action;
 
             for (KeyListener listener : this.listeners.values()) {
-                cancel = cancel || listener.handleInput(action);
-                if (action == KeyListener.InputAction.CHARACTER && c != -1) {
-                    cancel = cancel || listener.handleKey(c);
+                newAction = listener.handleInput(action);
+                if (c != -1) {
+                    newAction = listener.handleKey(c) ? null : action;
                 }
             }
 
-            if (cancel) {
+            if (newAction == null) {
                 return null;
             }
+
+            return newAction == action ? binding : ACTION_MAP.inverse().get(newAction);
 
         }
 
