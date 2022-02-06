@@ -57,6 +57,7 @@ sponge = "9.0.0-SNAPSHOT"
 waterdogpe = "1.1.5"
 spigot = "1.8.8-R0.1-SNAPSHOT"
 bungeecord = "1.18-R0.1-SNAPSHOT"
+minestom = "2e02dfd4d8"
 
 # platform extensions
 vault = "1.7.1"
@@ -143,6 +144,7 @@ sponge = { group = "org.spongepowered", name = "spongeapi", version.ref = "spong
 bungeecord = { group = "net.md-5", name = "bungeecord-api", version.ref = "bungeecord" }
 velocity = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
 waterdogpe = { group = "dev.waterdog.waterdogpe", name = "waterdog", version.ref = "waterdogpe" }
+minestom = { group = "com.github.Minestom", name = "Minestom", version.ref = "minestom"}
 
 # adventure
 adventureApi = { group = "net.kyori", name = "adventure-api", version.ref = "adventure" }
@@ -173,7 +175,7 @@ junit = ["junitApi", "junitParams", "junitEngine"]
 dockerJava = ["dockerJavaApi", "dockerJavaHttpclient5"]
 adventure = ["adventureApi", "adventureSerializerGson", "adventureSerializerLegacy"]
 
-serverPlatform = ["spigot", "sponge", "nukkitX"]
+serverPlatform = ["spigot", "sponge", "nukkitX", "minestom"]
 proxyPlatform = ["bungeecord", "velocity", "waterdogpe"]
 
 
