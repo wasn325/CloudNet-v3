@@ -16,8 +16,6 @@
 
 package eu.cloudnetservice.modules.bridge.platform.minestom;
 
-import static net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection;
-
 import eu.cloudnetservice.modules.bridge.platform.PlatformPlayerExecutorAdapter;
 import eu.cloudnetservice.modules.bridge.player.executor.ServerSelectorType;
 import java.time.Duration;
@@ -84,7 +82,8 @@ public class MinestomDirectPlayerExecutor extends PlatformPlayerExecutorAdapter 
 
   @Override
   protected void sendTitle(@NonNull Component title, @NonNull Component subtitle, int fadeIn, int stay, int fadeOut) {
-    final Title.Times times = Title.Times.of(Duration.ofMillis(fadeIn), Duration.ofMillis(stay), Duration.ofMillis(fadeOut));
+    final Title.Times times = Title.Times.of(Duration.ofMillis(fadeIn), Duration.ofMillis(stay),
+      Duration.ofMillis(fadeOut));
     this.playerSupplier.get().forEach(player -> player.showTitle(
       Title.title(title, subtitle, times)
     ));

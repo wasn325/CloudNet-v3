@@ -48,7 +48,7 @@ public class MinestomBridgeManagement extends PlatformBridgeManagement<Player, N
   private final Extension extension;
   private final PlayerExecutor directGlobalExecutor;
 
-  public MinestomBridgeManagement(Extension extension){
+  public MinestomBridgeManagement(Extension extension) {
     super(Wrapper.instance());
     this.extension = extension;
     this.directGlobalExecutor = new MinestomDirectPlayerExecutor(
@@ -86,7 +86,7 @@ public class MinestomBridgeManagement extends PlatformBridgeManagement<Player, N
       null,
       BridgeHostAndPortUtil.fromSocketAddress(player.getPlayerConnection().getRemoteAddress()),
       this.ownNetworkServiceInfo
-      );
+    );
   }
 
   @Override
@@ -131,8 +131,8 @@ public class MinestomBridgeManagement extends PlatformBridgeManagement<Player, N
   @Override
   public void appendServiceInformation(@NonNull ServiceInfoSnapshot snapshot) {
     super.appendServiceInformation(snapshot);
-    // append the bukkit specific information
-    snapshot.properties().append("Online-Count", MinecraftServer.getConnectionManager().getOnlinePlayers());
+    // append the Minestom specific information
+    snapshot.properties().append("Online-Count", MinecraftServer.getConnectionManager().getOnlinePlayers().size());
     snapshot.properties().append("Version", MinecraftServer.VERSION_NAME);
     // players
     snapshot.properties().append("Players", MinecraftServer.getConnectionManager().getOnlinePlayers().stream()

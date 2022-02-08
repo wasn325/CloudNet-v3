@@ -28,7 +28,7 @@ public class MinestomBridgeExtension extends Extension {
     management.registerServices(Wrapper.instance().servicesRegistry());
     management.postInit();
     //minestom listeners
-
+    new MinestomPlayerManagementListener(this, management);
   }
 
   @Override
