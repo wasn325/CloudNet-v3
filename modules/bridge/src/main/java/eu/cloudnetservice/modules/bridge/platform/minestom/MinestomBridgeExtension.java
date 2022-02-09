@@ -16,9 +16,13 @@
 
 package eu.cloudnetservice.modules.bridge.platform.minestom;
 
+import eu.cloudnetservice.cloudnet.common.log.LogManager;
 import eu.cloudnetservice.cloudnet.wrapper.Wrapper;
 import eu.cloudnetservice.modules.bridge.platform.PlatformBridgeManagement;
 import net.minestom.server.extensions.Extension;
+import net.minestom.server.extras.MojangAuth;
+import net.minestom.server.extras.bungee.BungeeCordProxy;
+import net.minestom.server.extras.velocity.VelocityProxy;
 
 public class MinestomBridgeExtension extends Extension {
 
@@ -27,8 +31,17 @@ public class MinestomBridgeExtension extends Extension {
     PlatformBridgeManagement<?, ?> management = new MinestomBridgeManagement(this);
     management.registerServices(Wrapper.instance().servicesRegistry());
     management.postInit();
-    //minestom listeners
+    // minestom listeners
     new MinestomPlayerManagementListener(this, management);
+
+    // Force Bungeecord Support, if Velocity and Bungeecord aren't enabled
+    if (!VelocityProxy.isEnabled() && !BungeeCordProxy.isEnabled()) {
+      BungeeCordProxy.enable();
+    }
+
+    if (MojangAuth.isEnabled()) {
+      LogManager.logger(MinestomBridgeExtension.class).warning("Please disable MojangAuth as it might cause problems with your Proxy!");
+    }
   }
 
   @Override
