@@ -53,9 +53,6 @@ public class MinestomCloudPermissionsPlayerListener {
           },
           MojangAuth.isEnabled());
       })
-      .addListener(PlayerLoginEvent.class, event -> {
-        MinestomPermissionsHelper.initPlayer(event.getPlayer());
-      })
       .addListener(PlayerDisconnectEvent.class, event -> {
         CloudPermissionsHelper.handlePlayerQuit(this.permissionsManagement, event.getPlayer().getUuid());
       });
