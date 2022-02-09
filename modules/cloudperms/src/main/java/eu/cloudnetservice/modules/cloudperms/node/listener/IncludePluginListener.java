@@ -38,7 +38,7 @@ public final class IncludePluginListener {
       && this.permissionsModule.permissionsConfig().excludedGroups().stream()
       .noneMatch(group -> event.service().serviceConfiguration().groups().contains(group))) {
       // get the target of the copy
-      var plugins = event.service().directory().resolve("plugins");
+      var plugins = event.service().pluginDirectory();
       FileUtil.createDirectory(plugins);
       // remove the old perms plugin
       var permsPluginFile = plugins.resolve("cloudnet-cloudperms.jar");
