@@ -68,6 +68,10 @@ public class ServiceEnvironmentType extends JsonDocPropertyHolder implements Nam
     .addDefaultProcessArgument("nogui")
     .properties(JsonDocument.newDocument().property(JAVA_SERVER, true))
     .build();
+  public static final ServiceEnvironmentType MINESTOM_SERVER = ServiceEnvironmentType.builder()
+    .name("MINESTOM_SERVER")
+    .properties(JsonDocument.newDocument().property(JAVA_SERVER, true).property(PLUGIN_DIR, "extensions"))
+    .build();
   public static final ServiceEnvironmentType MODDED_MINECRAFT_SERVER = ServiceEnvironmentType.builder()
     .name("MODDED_MINECRAFT_SERVER")
     .addDefaultProcessArgument("nogui")

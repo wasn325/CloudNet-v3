@@ -48,7 +48,8 @@ public final class TemplatePrepareListener {
         var in = resourceStream("files/nukkit/nukkit.yml")) {
         FileUtil.copy(in, out);
       }
-    } else if (event.environmentType().equals(ServiceEnvironmentType.MINECRAFT_SERVER)) {
+    } else if (event.environmentType().equals(ServiceEnvironmentType.MINECRAFT_SERVER)
+    || event.environmentType().equals(ServiceEnvironmentType.MINESTOM_SERVER)) {
       // server.properties, bukkit.yml, spigot.yml & sponge.conf
       try (var out = event.storage().newOutputStream("server.properties");
         var in = resourceStream("files/nms/server.properties")) {
