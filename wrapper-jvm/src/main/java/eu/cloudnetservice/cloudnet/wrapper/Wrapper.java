@@ -194,10 +194,6 @@ public class Wrapper extends CloudNetDriver {
 
     Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
 
-    // Minestom - Provide host and port as system properties
-    System.setProperty("host", this.currentServiceInfoSnapshot.address().host());
-    System.setProperty("port", String.valueOf(this.currentServiceInfoSnapshot.address().port()));
-
     // start the application
     if (!this.startApplication()) {
       System.exit(-1);
