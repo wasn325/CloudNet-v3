@@ -16,6 +16,7 @@
 
 package eu.cloudnetservice.modules.cloudperms.minestom;
 
+import com.google.common.util.concurrent.MoreExecutors;
 import eu.cloudnetservice.cloudnet.driver.CloudNetDriver;
 import eu.cloudnetservice.cloudnet.wrapper.Wrapper;
 import eu.cloudnetservice.modules.cloudperms.PermissionsUpdateListener;
@@ -37,7 +38,7 @@ public class MinestomCloudPermissionsExtension extends Extension {
     CloudNetDriver.instance().eventManager()
       .registerListener(
         new PermissionsUpdateListener<>(
-          runnable -> MinecraftServer.getSchedulerManager().buildTask(runnable).schedule(),
+          MoreExecutors.directExecutor(),
           Player::refreshCommands,
           Player::getUuid,
           MinecraftServer.getConnectionManager()::getPlayer,
