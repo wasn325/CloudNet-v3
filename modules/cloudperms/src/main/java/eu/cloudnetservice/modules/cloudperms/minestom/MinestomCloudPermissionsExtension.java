@@ -18,9 +18,11 @@ package eu.cloudnetservice.modules.cloudperms.minestom;
 
 import eu.cloudnetservice.cloudnet.driver.CloudNetDriver;
 import eu.cloudnetservice.cloudnet.wrapper.Wrapper;
+import eu.cloudnetservice.modules.cloudperms.PermissionsUpdateListener;
 import eu.cloudnetservice.modules.cloudperms.minestom.listener.MinestomCloudPermissionsPlayerListener;
 import eu.cloudnetservice.modules.cloudperms.minestom.player.CloudPlayer;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Player;
 import net.minestom.server.extensions.Extension;
 
 public class MinestomCloudPermissionsExtension extends Extension {
@@ -32,16 +34,16 @@ public class MinestomCloudPermissionsExtension extends Extension {
 
     MinecraftServer.getConnectionManager().setPlayerProvider(CloudPlayer::new);
 
-    /*CloudNetDriver.instance().eventManager()
+    CloudNetDriver.instance().eventManager()
       .registerListener(
         new PermissionsUpdateListener<>(
           runnable -> MinecraftServer.getSchedulerManager().buildTask(runnable).schedule(),
-          MinestomPermissionsHelper::initPlayer,
+          Player::refreshCommands,
           Player::getUuid,
           MinecraftServer.getConnectionManager()::getPlayer,
           MinecraftServer.getConnectionManager()::getOnlinePlayers
         )
-      );*/
+      );
   }
 
   @Override
