@@ -55,6 +55,7 @@ final class BukkitSimpleNameTagsManager extends SimpleNameTagsManager<Player> {
     if (manager != null && player.getScoreboard().equals(manager.getMainScoreboard())) {
       player.setScoreboard(manager.getNewScoreboard());
     }
+
   }
 
   @Override
