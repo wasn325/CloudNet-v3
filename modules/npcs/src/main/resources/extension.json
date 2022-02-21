@@ -1,0 +1,8 @@
+{
+  "name": "cloudnet_npcs",
+  "version": "{project.build.version}",
+  "entrypoint": "eu.cloudnetservice.modules.npc.platform.minestom.MinestomNPCExtension",
+  "dependencies": [
+    "cloudnet_bridge"
+  ]
+}

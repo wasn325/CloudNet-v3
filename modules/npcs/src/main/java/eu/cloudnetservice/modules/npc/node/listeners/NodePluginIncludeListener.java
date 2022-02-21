@@ -60,10 +60,12 @@ public final class NodePluginIncludeListener {
         var hasEntry = this.management.npcConfiguration().entries().stream()
           .anyMatch(entry -> event.serviceConfiguration().groups().contains(entry.targetGroup()));
         if (hasEntry) {
-          var pluginsDirectory = event.service().directory().resolve("plugins");
-          // copy protocol lib
-          var protocolLibPath = pluginsDirectory.resolve("ProtocolLib.jar");
-          FileUtil.copy(PROTOCOLLIB_CACHE_PATH, protocolLibPath);
+          var pluginsDirectory = event.service().pluginDirectory();
+          // copy protocol lib only on vanilla (and forks) servers
+          if (type == ServiceEnvironmentType.MINECRAFT_SERVER) {
+            var protocolLibPath = pluginsDirectory.resolve("ProtocolLib.jar");
+            FileUtil.copy(PROTOCOLLIB_CACHE_PATH, protocolLibPath);
+          }
           // copy the plugin
           var pluginPath = pluginsDirectory.resolve("cloudnet-npcs.jar");
           FileUtil.delete(pluginPath);

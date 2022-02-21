@@ -1,0 +1,187 @@
+/*
+ * Copyright 2019-2022 CloudNetService team & contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package eu.cloudnetservice.modules.npc.platform.minestom;
+
+import eu.cloudnetservice.cloudnet.driver.service.ServiceEnvironmentType;
+import eu.cloudnetservice.cloudnet.driver.service.ServiceInfoSnapshot;
+import eu.cloudnetservice.cloudnet.driver.service.ServiceLifeCycle;
+import eu.cloudnetservice.modules.bridge.WorldPosition;
+import eu.cloudnetservice.modules.npc.NPC;
+import eu.cloudnetservice.modules.npc.NPC.NPCType;
+import eu.cloudnetservice.modules.npc.configuration.NPCConfiguration;
+import eu.cloudnetservice.modules.npc.platform.PlatformNPCManagement;
+import eu.cloudnetservice.modules.npc.platform.PlatformSelectorEntity;
+import eu.cloudnetservice.modules.npc.platform.minestom.entity.EntityPlatormSelector;
+import eu.cloudnetservice.modules.npc.platform.minestom.entity.NPCPlatformSelector;
+import lombok.NonNull;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.Player;
+import net.minestom.server.extensions.Extension;
+import net.minestom.server.instance.Instance;
+import net.minestom.server.inventory.Inventory;
+import net.minestom.server.item.ItemStack;
+
+public class MinestomPlatformNPCManagement extends PlatformNPCManagement<Pos, Instance, Player, ItemStack, Inventory> {
+
+  protected final Extension extension;
+  // protected final Task knockBackTask;
+  //
+  // protected volatile Task npcEmoteTask;
+
+  public MinestomPlatformNPCManagement(Extension extension) {
+    this.extension = extension;
+
+    // start the emote player
+    // this.startEmoteTask(false);
+    // start the knock back task
+    // this.knockBackTask = MinecraftServer.getSchedulerManager().scheduleTask(() -> {
+    //   var configEntry = this.applicableNPCConfigurationEntry();
+    //   if (configEntry != null) {
+    //     // check if knock back is enabled
+    //     var distance = configEntry.knockbackDistance();
+    //     var strength = configEntry.knockbackStrength();
+    //     if (distance > 0 && strength > 0) {
+    //       // select the knockback emote id now (sometimes we need to play them sync for all npcs)
+    //       var labyModEmotes = configEntry.emoteConfiguration().onKnockbackEmoteIds();
+    //       var emoteId = this.randomEmoteId(configEntry.emoteConfiguration(), labyModEmotes);
+    //       //
+    //       for (var value : this.trackedEntities.values()) {
+    //         if (value.spawned()) {
+    //           // select all nearby entities of each spawned mob
+    //           var nearbyEntities = value.world().getNearbyEntities(
+    //             value.location(),
+    //             distance);
+    //           // loop over all entities and knock them back
+    //           if (!nearbyEntities.isEmpty()) {
+    //             for (var entity : nearbyEntities) {
+    //               // check if the entity is a player
+    //               if (entity instanceof Player player && !entity.hasPermission("cloudnet.npcs.knockback.bypass")) {
+    //                 // apply the strength to the curren vector
+    //                 var vector = player.getPosition().asVec().sub(value.location().asVec())
+    //                   .normalize()
+    //                   .mul(strength)
+    //                   .withY(0.2);
+    //                 // apply the velocity
+    //                 player.setVelocity(vector);
+    //                 /*// check if we should send a labymod emote
+    //                   if (value instanceof FakePlayer) {
+    //                     if (emoteId == -1) {
+    //                       var emote = labyModEmotes[ThreadLocalRandom.current().nextInt(0, labyModEmotes.length)];
+    //                       ((NPCBukkitPlatformSelector) value).handleNPC()
+    //                         .labymod()
+    //                         .queue(LabyModAction.EMOTE, emote)
+    //                         .send(player);
+    //                     } else {
+    //                       // use the selected emote
+    //                       ((NPCBukkitPlatformSelector) value).handleNPC()
+    //                         .labymod()
+    //                         .queue(LabyModAction.EMOTE, emoteId)
+    //                         .send(player);
+    //                     }
+    //                   }*/
+    //               }
+    //             }
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
+    // }, TaskSchedule.millis(20), TaskSchedule.millis(5));
+
+  }
+
+  @Override
+  protected @NonNull PlatformSelectorEntity<Pos, Instance, Player, ItemStack, Inventory> createSelectorEntity(
+    @NonNull NPC base) {
+    return base.npcType() == NPCType.ENTITY
+      ? new EntityPlatormSelector(this, this.extension, base)
+      : new NPCPlatformSelector(this, this.extension, base);
+  }
+
+  @Override
+  public @NonNull WorldPosition toWorldPosition(@NonNull Pos location, @NonNull Instance world, @NonNull String group) {
+    return new WorldPosition(
+      location.x(),
+      location.y(),
+      location.z(),
+      location.yaw(),
+      location.pitch(),
+      world.getUniqueId().toString(),
+      group
+    );
+  }
+
+  @Override
+  public @NonNull Pos toPlatformLocation(@NonNull WorldPosition position) {
+    return new Pos(position.x(), position.y(), position.z(), (float) position.yaw(), (float) position.pitch());
+  }
+
+  @Override
+  protected boolean shouldTrack(
+    @NonNull ServiceInfoSnapshot service) {
+    return service.lifeCycle() == ServiceLifeCycle.RUNNING
+      && ServiceEnvironmentType.JAVA_SERVER.get(service.serviceId().environment().properties());
+  }
+
+  @Override
+  public void handleInternalNPCConfigUpdate(@NonNull NPCConfiguration configuration) {
+    super.handleInternalNPCConfigUpdate(configuration);
+    // re-schedule the emote task if it's not yet running
+    this.startEmoteTask(false);
+  }
+
+  protected void startEmoteTask(boolean force) {
+    // only start the task if not yet running
+    // if (this.npcEmoteTask == null || force) {
+    //   var ent = this.applicableNPCConfigurationEntry();
+    //   if (ent != null && ent.emoteConfiguration().minEmoteDelayTicks() > 0) {
+    //     // get the delay for the next npc emote play
+    //     long delay;
+    //     if (ent.emoteConfiguration().maxEmoteDelayTicks() > ent.emoteConfiguration().minEmoteDelayTicks()) {
+    //       delay = ThreadLocalRandom.current().nextLong(
+    //         ent.emoteConfiguration().minEmoteDelayTicks(),
+    //         ent.emoteConfiguration().maxEmoteDelayTicks());
+    //     } else {
+    //       delay = ent.emoteConfiguration().minEmoteDelayTicks();
+    //     }
+    //     // run the task
+    //     this.npcEmoteTask = MinecraftServer.getSchedulerManager().scheduleTask(() -> {
+    //       // select an emote to play
+    //       var emotes = ent.emoteConfiguration().emoteIds();
+    //       var emoteId = this.randomEmoteId(ent.emoteConfiguration(), emotes);
+    //       // check if we can select an emote
+    //       if (emoteId >= -1) {
+    //         // play the emote on each npc
+    //         /*for (var npc : this.npcPool.getNPCs()) {
+    //           if (emoteId == -1) {
+    //             npc.labymod()
+    //               .queue(LabyModAction.EMOTE, emotes[ThreadLocalRandom.current().nextInt(0, emotes.length)])
+    //               .send();
+    //           } else {
+    //             npc.labymod().queue(LabyModAction.EMOTE, emoteId).send();
+    //           }
+    //         }*/
+    //       }
+    //       // re-schedule
+    //       this.startEmoteTask(true);
+    //     }, TaskSchedule.millis(0), TaskSchedule.millis(delay));
+    //   } else {
+    //     this.npcEmoteTask = null;
+    //   }
+    // }
+  }
+}
