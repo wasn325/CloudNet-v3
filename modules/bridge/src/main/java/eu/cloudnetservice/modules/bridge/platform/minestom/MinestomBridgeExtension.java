@@ -29,7 +29,7 @@ public class MinestomBridgeExtension extends Extension {
   @Override
   public void initialize() {
     PlatformBridgeManagement<?, ?> management = new MinestomBridgeManagement(this);
-    management.registerServices(Wrapper.instance().servicesRegistry());
+    management.registerServices(Wrapper.instance().serviceRegistry());
     management.postInit();
     // minestom listeners
     new MinestomPlayerManagementListener(this, management);

@@ -81,7 +81,7 @@ public final class NPCCommand extends Command {
 
   private static final String COPIED_NPC_KEY = "npc_copy_entry";
 
-  private static final Tag<String> builderTag = Tag.String(COPIED_NPC_KEY);
+  private static final Tag<String> COPY_TAG = Tag.String(COPIED_NPC_KEY);
 
   private final Extension extension;
   private final MinestomPlatformNPCManagement management;
@@ -122,7 +122,7 @@ public final class NPCCommand extends Command {
     Command ccp = new Command("ccp", "clearclipboard");
     ccp.setDefaultExecutor(this::sendHelp);
     ccp.addSyntax((sender, context) -> {
-      sender.removeTag(builderTag);
+      sender.removeTag(COPY_TAG);
       sender.sendMessage("§7Your clipboard was cleared §asuccessfully§7.");
     });
     addSubcommand(ccp);
@@ -229,8 +229,8 @@ public final class NPCCommand extends Command {
       return;
     }
     // check if the player has already a npc in the clipboard
-    if (!player.hasTag(builderTag)) {
-      player.setTag(builderTag, JsonDocument.newDocument(NPC.builder(npc)).toString());
+    if (!player.hasTag(COPY_TAG)) {
+      player.setTag(COPY_TAG, JsonDocument.newDocument(NPC.builder(npc)).toString());
       // player.setMetadata(COPIED_NPC_KEY, new FixedMetadataValue(this.plugin, NPC.builder(npc)));
       sender.sendMessage("§7The npc was copied §asuccessfully §7to your clipboard");
     } else {
@@ -246,11 +246,11 @@ public final class NPCCommand extends Command {
       return;
     }
     // check if the player has already a npc in the clipboard
-    if (!player.hasTag(builderTag)) {
+    if (!player.hasTag(COPY_TAG)) {
       // remove the npc
       this.management.deleteNPC(npc);
       // add the metadata
-      player.setTag(builderTag, JsonDocument.newDocument(NPC.builder(npc)).toString());
+      player.setTag(COPY_TAG, JsonDocument.newDocument(NPC.builder(npc)).toString());
       sender.sendMessage("§7The npc was cut §asuccessfully §7to your clipboard");
     } else {
       sender.sendMessage("§cThere is a npc already in your clipboard! Paste it or clear your clipboard.");
@@ -259,11 +259,11 @@ public final class NPCCommand extends Command {
 
   private void pasteNPC(CommandSender sender, CommandContext context) {
     var player = (Player) sender;
-    if (!player.hasTag(builderTag)) {
+    if (!player.hasTag(COPY_TAG)) {
       sender.sendMessage("§cThere is no npc in your clipboard!");
       return;
     }
-    var values = player.getTag(builderTag);
+    var values = player.getTag(COPY_TAG);
 
     var entry = this.management.applicableNPCConfigurationEntry();
     if (entry == null) {
@@ -278,7 +278,7 @@ public final class NPCCommand extends Command {
     this.management.createNPC(npc);
     sender.sendMessage("§7The service selector mob was pasted §asuccessfully§7!");
     // clear the clipboard
-    player.removeTag(builderTag);
+    player.removeTag(COPY_TAG);
   }
 
   private void listNPC(CommandSender sender, CommandContext context) {
@@ -306,7 +306,7 @@ public final class NPCCommand extends Command {
     NPC updatedNpc;
     String value = context.get("value");
 
-    switch ((String)context.get("action")) {
+    switch ((String) context.get("action")) {
       case "display" -> {
         var displayName = value;
         if (displayName.length() > 16) {
@@ -523,7 +523,8 @@ public final class NPCCommand extends Command {
 
       // unknown option
       default -> {
-        sender.sendMessage(String.format("§cNo option with name §6%s §cfound!", ((String) context.get("action")).toLowerCase()));
+        sender.sendMessage(
+          String.format("§cNo option with name §6%s §cfound!", ((String) context.get("action")).toLowerCase()));
         return;
       }
     }

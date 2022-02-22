@@ -401,7 +401,7 @@ public abstract class MinestomPlatformSelectorEntity implements
   }
 
   protected @NonNull PlayerManager playerManager() {
-    return CloudNetDriver.instance().servicesRegistry().firstService(PlayerManager.class);
+    return CloudNetDriver.instance().serviceRegistry().firstProvider(PlayerManager.class);
   }
 
   protected double heightAddition(int lineNumber) {

@@ -18,7 +18,7 @@ package eu.cloudnetservice.modules.bridge.platform.minestom;
 
 import static net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection;
 
-import eu.cloudnetservice.cloudnet.common.registry.ServicesRegistry;
+import eu.cloudnetservice.cloudnet.driver.registry.ServiceRegistry;
 import eu.cloudnetservice.cloudnet.driver.service.ServiceInfoSnapshot;
 import eu.cloudnetservice.cloudnet.wrapper.Wrapper;
 import eu.cloudnetservice.modules.bridge.BridgeServiceHelper;
@@ -67,9 +67,9 @@ public class MinestomBridgeManagement extends PlatformBridgeManagement<Player, N
   }
 
   @Override
-  public void registerServices(@NonNull ServicesRegistry registry) {
-    registry.registerService(PlayerManager.class, "PlayerManager", this.playerManager);
-    registry.registerService(PlatformBridgeManagement.class, "MinestomBridgeManagement", this);
+  public void registerServices(@NonNull ServiceRegistry registry) {
+    registry.registerProvider(PlayerManager.class, "PlayerManager", this.playerManager);
+    registry.registerProvider(PlatformBridgeManagement.class, "MinestomBridgeManagement", this);
   }
 
   @Override
