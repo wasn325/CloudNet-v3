@@ -440,7 +440,7 @@ public abstract class AbstractService implements CloudService {
   }
 
   @Override
-  public Queue<String> cachedLogMessages() {
+  public @NonNull Queue<String> cachedLogMessages() {
     return this.serviceConsoleLogCache().cachedLogMessages();
   }
 
@@ -570,6 +570,7 @@ public abstract class AbstractService implements CloudService {
     // initialize the service directory
     var firstStartup = Files.notExists(this.serviceDirectory);
     FileUtil.createDirectory(this.serviceDirectory);
+    FileUtil.createDirectory(this.pluginDirectory);
     // write the configuration file for the service
     var listeners = this.nodeConfiguration().identity().listeners();
     JsonDocument.newDocument()

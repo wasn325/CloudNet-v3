@@ -17,10 +17,7 @@
 package eu.cloudnetservice.cloudnet.driver;
 
 import com.google.common.base.Preconditions;
-import eu.cloudnetservice.cloudnet.common.concurrent.CompletableTask;
 import eu.cloudnetservice.cloudnet.common.concurrent.Task;
-import eu.cloudnetservice.cloudnet.common.registry.DefaultServicesRegistry;
-import eu.cloudnetservice.cloudnet.common.registry.ServicesRegistry;
 import eu.cloudnetservice.cloudnet.driver.database.DatabaseProvider;
 import eu.cloudnetservice.cloudnet.driver.event.DefaultEventManager;
 import eu.cloudnetservice.cloudnet.driver.event.EventManager;
@@ -36,11 +33,13 @@ import eu.cloudnetservice.cloudnet.driver.network.rpc.defaults.handler.DefaultRP
 import eu.cloudnetservice.cloudnet.driver.network.rpc.defaults.object.DefaultObjectMapper;
 import eu.cloudnetservice.cloudnet.driver.permission.PermissionManagement;
 import eu.cloudnetservice.cloudnet.driver.provider.CloudMessenger;
+import eu.cloudnetservice.cloudnet.driver.provider.CloudServiceFactory;
+import eu.cloudnetservice.cloudnet.driver.provider.CloudServiceProvider;
+import eu.cloudnetservice.cloudnet.driver.provider.ClusterNodeProvider;
 import eu.cloudnetservice.cloudnet.driver.provider.GroupConfigurationProvider;
-import eu.cloudnetservice.cloudnet.driver.provider.NodeInfoProvider;
 import eu.cloudnetservice.cloudnet.driver.provider.ServiceTaskProvider;
-import eu.cloudnetservice.cloudnet.driver.provider.service.CloudServiceFactory;
-import eu.cloudnetservice.cloudnet.driver.provider.service.GeneralCloudServiceProvider;
+import eu.cloudnetservice.cloudnet.driver.registry.DefaultServiceRegistry;
+import eu.cloudnetservice.cloudnet.driver.registry.ServiceRegistry;
 import eu.cloudnetservice.cloudnet.driver.service.ProcessSnapshot;
 import eu.cloudnetservice.cloudnet.driver.template.TemplateStorage;
 import java.time.Instant;
@@ -62,7 +61,7 @@ public abstract class CloudNetDriver {
 
   protected final EventManager eventManager = new DefaultEventManager();
   protected final ModuleProvider moduleProvider = new DefaultModuleProvider();
-  protected final ServicesRegistry servicesRegistry = new DefaultServicesRegistry();
+  protected final ServiceRegistry serviceRegistry = new DefaultServiceRegistry();
   protected final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
 
   protected final RPCHandlerRegistry rpcHandlerRegistry = new DefaultRPCHandlerRegistry();
@@ -77,11 +76,11 @@ public abstract class CloudNetDriver {
   protected CloudServiceFactory cloudServiceFactory;
 
   protected CloudMessenger messenger;
-  protected NodeInfoProvider nodeInfoProvider;
   protected DatabaseProvider databaseProvider;
+  protected ClusterNodeProvider clusterNodeProvider;
   protected ServiceTaskProvider serviceTaskProvider;
+  protected CloudServiceProvider cloudServiceProvider;
   protected GroupConfigurationProvider groupConfigurationProvider;
-  protected GeneralCloudServiceProvider generalCloudServiceProvider;
 
   protected DriverEnvironment driverEnvironment = DriverEnvironment.EMBEDDED;
 
@@ -133,10 +132,10 @@ public abstract class CloudNetDriver {
   }
 
   /**
-   * @return the set {@link NodeInfoProvider} which provides access to the local node or nodes in the cluster.
+   * @return the set {@link ClusterNodeProvider} which provides access to the local node or nodes in the cluster.
    */
-  public @NonNull NodeInfoProvider nodeInfoProvider() {
-    return this.nodeInfoProvider;
+  public @NonNull ClusterNodeProvider clusterNodeProvider() {
+    return this.clusterNodeProvider;
   }
 
   /**
@@ -216,15 +215,15 @@ public abstract class CloudNetDriver {
   public abstract @NonNull Collection<TemplateStorage> availableTemplateStorages();
 
   public @NonNull Task<Collection<TemplateStorage>> availableTemplateStoragesAsync() {
-    return CompletableTask.supply(this::availableTemplateStorages);
+    return Task.supply(this::availableTemplateStorages);
   }
 
   public @NonNull DatabaseProvider databaseProvider() {
     return this.databaseProvider;
   }
 
-  public @NonNull GeneralCloudServiceProvider cloudServiceProvider() {
-    return this.generalCloudServiceProvider;
+  public @NonNull CloudServiceProvider cloudServiceProvider() {
+    return this.cloudServiceProvider;
   }
 
   public @NonNull NetworkClient networkClient() {
@@ -240,8 +239,8 @@ public abstract class CloudNetDriver {
     return ProcessSnapshot.ownPID();
   }
 
-  public @NonNull ServicesRegistry servicesRegistry() {
-    return this.servicesRegistry;
+  public @NonNull ServiceRegistry serviceRegistry() {
+    return this.serviceRegistry;
   }
 
   public @NonNull EventManager eventManager() {

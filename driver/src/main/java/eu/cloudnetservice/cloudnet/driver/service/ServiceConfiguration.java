@@ -21,7 +21,7 @@ import eu.cloudnetservice.cloudnet.common.concurrent.Task;
 import eu.cloudnetservice.cloudnet.common.document.gson.JsonDocument;
 import eu.cloudnetservice.cloudnet.common.document.property.JsonDocPropertyHolder;
 import eu.cloudnetservice.cloudnet.driver.CloudNetDriver;
-import eu.cloudnetservice.cloudnet.driver.provider.service.SpecificCloudServiceProvider;
+import eu.cloudnetservice.cloudnet.driver.provider.SpecificCloudServiceProvider;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -68,6 +68,7 @@ public class ServiceConfiguration extends JsonDocPropertyHolder implements Clone
     @NonNull Set<ServiceRemoteInclusion> includes,
     @NonNull JsonDocument properties
   ) {
+    super(properties);
     this.serviceId = serviceId;
     this.port = port;
     this.runtime = runtime;
@@ -80,7 +81,6 @@ public class ServiceConfiguration extends JsonDocPropertyHolder implements Clone
     this.templates = templates;
     this.deployments = deployments;
     this.includes = includes;
-    this.properties = properties;
   }
 
   public static @NonNull Builder builder() {

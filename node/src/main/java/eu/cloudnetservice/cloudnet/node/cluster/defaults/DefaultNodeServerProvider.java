@@ -16,7 +16,6 @@
 
 package eu.cloudnetservice.cloudnet.node.cluster.defaults;
 
-import eu.cloudnetservice.cloudnet.common.concurrent.CompletedTask;
 import eu.cloudnetservice.cloudnet.common.concurrent.Task;
 import eu.cloudnetservice.cloudnet.driver.channel.ChannelMessage;
 import eu.cloudnetservice.cloudnet.driver.network.NetworkChannel;
@@ -33,7 +32,6 @@ import eu.cloudnetservice.cloudnet.node.cluster.NodeServer;
 import eu.cloudnetservice.cloudnet.node.cluster.NodeServerProvider;
 import eu.cloudnetservice.cloudnet.node.cluster.task.LocalNodeUpdateTask;
 import eu.cloudnetservice.cloudnet.node.cluster.task.NodeDisconnectTrackerTask;
-import eu.cloudnetservice.cloudnet.node.network.listener.message.NodeChannelMessageListener;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
@@ -66,11 +64,7 @@ public class DefaultNodeServerProvider implements NodeServerProvider {
     this.localNode = new LocalNodeServer(node, this);
     this.nodeServers.add(this.localNode);
 
-    // register everything we need to work properly
-    node.eventManager().registerListener(new NodeChannelMessageListener(
-      node.eventManager(),
-      node.dataSyncRegistry(),
-      this));
+    // start all update tasks
     this.executor.scheduleAtFixedRate(new LocalNodeUpdateTask(this), 1, 1, TimeUnit.SECONDS);
     this.executor.scheduleAtFixedRate(new NodeDisconnectTrackerTask(this), 5, 5, TimeUnit.SECONDS);
   }
@@ -137,6 +131,18 @@ public class DefaultNodeServerProvider implements NodeServerProvider {
   }
 
   @Override
+  public void unregisterNode(@NonNull String uniqueId) {
+    this.nodeServers.stream()
+      .filter(server -> !(server instanceof LocalNodeServer))
+      .filter(server -> server.name().equals(uniqueId))
+      .findFirst()
+      .ifPresent(server -> {
+        server.close();
+        this.nodeServers.remove(server);
+      });
+  }
+
+  @Override
   public void selectHeadNode() {
     this.headNode = this.nodeServers.stream()
       .filter(NodeServer::available)
@@ -164,7 +170,7 @@ public class DefaultNodeServerProvider implements NodeServerProvider {
         .transferChunkedData();
     }
     // if there are no channels we "pseudo" completed the transfer
-    return CompletedTask.done(TransferStatus.SUCCESS);
+    return Task.completedTask(TransferStatus.SUCCESS);
   }
 
   @Override
@@ -186,7 +192,7 @@ public class DefaultNodeServerProvider implements NodeServerProvider {
         .transferChunkedData();
     }
     // if there are no channels we "pseudo" completed the transfer
-    return CompletedTask.done(TransferStatus.SUCCESS);
+    return Task.completedTask(TransferStatus.SUCCESS);
   }
 
   @Override

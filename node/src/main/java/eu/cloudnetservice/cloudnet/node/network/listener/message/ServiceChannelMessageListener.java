@@ -29,7 +29,7 @@ import eu.cloudnetservice.cloudnet.driver.event.events.service.CloudServiceLogEn
 import eu.cloudnetservice.cloudnet.driver.event.events.service.CloudServiceUpdateEvent;
 import eu.cloudnetservice.cloudnet.driver.network.buffer.DataBuf;
 import eu.cloudnetservice.cloudnet.driver.network.def.NetworkConstants;
-import eu.cloudnetservice.cloudnet.driver.provider.service.CloudServiceFactory;
+import eu.cloudnetservice.cloudnet.driver.provider.CloudServiceFactory;
 import eu.cloudnetservice.cloudnet.driver.service.ServiceConfiguration;
 import eu.cloudnetservice.cloudnet.driver.service.ServiceInfoSnapshot;
 import eu.cloudnetservice.cloudnet.driver.service.ServiceLifeCycle;
@@ -62,7 +62,7 @@ public final class ServiceChannelMessageListener {
         case "node_to_head_start_service" -> {
           var configuration = event.content().readObject(ServiceConfiguration.class);
           event.queryResponse(this.cloudServiceFactory.createCloudServiceAsync(configuration)
-            .map(service -> ChannelMessage.buildResponseFor(event.channelMessage())
+            .thenApply(service -> ChannelMessage.buildResponseFor(event.channelMessage())
               .buffer(DataBuf.empty().writeObject(service))
               .build()));
         }

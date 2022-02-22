@@ -170,7 +170,7 @@ public final class CloudNetTick {
   }
 
   private void startService() {
-    for (var task : this.cloudNet.serviceTaskProvider().permanentServiceTasks()) {
+    for (var task : this.cloudNet.serviceTaskProvider().serviceTasks()) {
       if (!task.maintenance()) {
         // get the count of running services
         var runningServiceCount = this.cloudNet.cloudServiceProvider().servicesByTask(task.name())
@@ -225,11 +225,11 @@ public final class CloudNetTick {
         // check if the execution limit is reached
         if (this.executionTimes != -1 && ++this.executionCounter >= this.executionTimes) {
           // execute the task one last time - no reset
-          super.run();
+          super.run(true);
           return true;
         }
         // execute the task and reset
-        super.runAndReset();
+        super.run(false);
         // set the next scheduled tick
         this.nextScheduledTick = currentTick + this.tickPeriod;
       }

@@ -23,9 +23,9 @@ import eu.cloudnetservice.cloudnet.driver.network.buffer.DataBuf;
 import eu.cloudnetservice.cloudnet.driver.network.cluster.NetworkClusterNode;
 import eu.cloudnetservice.cloudnet.driver.network.cluster.NetworkClusterNodeInfoSnapshot;
 import eu.cloudnetservice.cloudnet.driver.network.def.NetworkConstants;
-import eu.cloudnetservice.cloudnet.driver.provider.service.CloudServiceFactory;
-import eu.cloudnetservice.cloudnet.driver.provider.service.RemoteCloudServiceFactory;
-import eu.cloudnetservice.cloudnet.driver.provider.service.SpecificCloudServiceProvider;
+import eu.cloudnetservice.cloudnet.driver.provider.CloudServiceFactory;
+import eu.cloudnetservice.cloudnet.driver.provider.SpecificCloudServiceProvider;
+import eu.cloudnetservice.cloudnet.driver.provider.defaults.RemoteCloudServiceFactory;
 import eu.cloudnetservice.cloudnet.node.CloudNet;
 import eu.cloudnetservice.cloudnet.node.cluster.NodeServer;
 import eu.cloudnetservice.cloudnet.node.cluster.NodeServerProvider;
@@ -37,7 +37,6 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -213,7 +212,7 @@ public class RemoteNodeServer implements NodeServer {
 
   @Override
   public @Nullable SpecificCloudServiceProvider serviceProvider(@NonNull UUID uniqueId) {
-    return this.node.cloudServiceProvider().specificProvider(uniqueId);
+    return this.node.cloudServiceProvider().serviceProvider(uniqueId);
   }
 
   @Override
@@ -225,8 +224,9 @@ public class RemoteNodeServer implements NodeServer {
       .buffer(DataBuf.empty().writeString(commandLine))
       .build()
       .sendSingleQueryAsync()
-      .map(message -> message.content().<Collection<String>>readObject(COLLECTION_STRING))
-      .get(5, TimeUnit.SECONDS, Set.of());
+      .thenApply(message -> message.content().<Collection<String>>readObject(COLLECTION_STRING))
+      .exceptionally($ -> Set.of())
+      .join();
   }
 
   @Override
