@@ -209,11 +209,6 @@ public class CloudNet extends CloudNetDriver {
     // convert from h2 to xodus if needed
     this.convertDatabase();
 
-    // initialize the default database provider
-    this.databaseProvider(this.serviceRegistry.provider(
-      AbstractDatabaseProvider.class,
-      this.configuration.properties().getString("database_provider", "xodus")));
-
     // apply all module updates if we're not running in dev mode
     if (!DEV_MODE) {
       LOGGER.info(I18n.trans("start-module-updater"));
@@ -223,6 +218,11 @@ public class CloudNet extends CloudNetDriver {
     // load the modules before proceeding for example to allow the database provider init
     this.moduleProvider.loadAll();
 
+    // initialize the default database provider
+    this.databaseProvider(this.serviceRegistry.provider(
+      AbstractDatabaseProvider.class,
+      this.configuration.properties().getString("database_provider", "xodus")));
+
     // check if there is a database provider or initialize the default one
     if (this.databaseProvider == null || !this.databaseProvider.init()) {
       this.databaseProvider(this.serviceRegistry.provider(AbstractDatabaseProvider.class, "xodus"));
@@ -231,6 +231,8 @@ public class CloudNet extends CloudNetDriver {
         throw new IllegalStateException("No database provider selected for startup - Unable to proceed");
       }
     }
+    // notify the user about the selected database
+    LOGGER.info(I18n.trans("start-connect-database", this.databaseProvider.name()));
 
     // init the permission management
     this.permissionManagement.init();

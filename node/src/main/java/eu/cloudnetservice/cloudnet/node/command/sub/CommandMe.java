@@ -20,6 +20,7 @@ import cloud.commandframework.annotations.CommandMethod;
 import cloud.commandframework.annotations.CommandPermission;
 import cloud.commandframework.annotations.Flag;
 import eu.cloudnetservice.cloudnet.common.unsafe.CPUUsageResolver;
+import eu.cloudnetservice.cloudnet.driver.service.ProcessSnapshot;
 import eu.cloudnetservice.cloudnet.node.CloudNet;
 import eu.cloudnetservice.cloudnet.node.command.annotation.CommandAlias;
 import eu.cloudnetservice.cloudnet.node.command.annotation.Description;
@@ -43,7 +44,7 @@ public final class CommandMe {
   private static final String UPDATE_REPO = System.getProperty("cloudnet.updateRepo", "CloudNetService/launchermeta");
 
   @CommandMethod("me|info")
-  public void me(CommandSource commandSource, @Flag("showClusterId") boolean showFullClusterId) {
+  public void me(@NonNull CommandSource source, @Flag("showClusterId") boolean showFullClusterId) {
     var cloudNet = CloudNet.instance();
     var memoryMXBean = ManagementFactory.getMemoryMXBean();
     var nodeInfoSnapshot = cloudNet.nodeServerProvider().localNode().nodeInfoSnapshot();
@@ -54,7 +55,7 @@ public final class CommandMe {
       clusterId = this.removeUUIDParts(cloudNet.config().clusterConfig().clusterId());
     }
 
-    commandSource.sendMessage(List.of(
+    source.sendMessage(List.of(
       " ",
       CloudNet.instance().version() + " created by Dytanic, maintained by the CloudNet Community",
       "Discord: <https://discord.cloudnetservice.eu/>",
@@ -73,7 +74,7 @@ public final class CommandMe {
         + nodeInfoSnapshot.reservedMemory()
         + "/"
         + nodeInfoSnapshot.maxMemory() + " MB",
-      "Threads: " + Thread.getAllStackTraces().keySet().size(),
+      "Threads: " + ProcessSnapshot.THREAD_MX_BEAN.getThreadCount(),
       "Heap usage: "
         + (memoryMXBean.getHeapMemoryUsage().getUsed() / (1024 * 1024))
         + "/"

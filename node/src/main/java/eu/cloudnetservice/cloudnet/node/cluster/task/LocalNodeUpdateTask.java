@@ -34,7 +34,7 @@ public record LocalNodeUpdateTask(@NonNull DefaultNodeServerProvider provider) i
   public void run() {
     try {
       var localNode = this.provider.localNode();
-      var nodes = this.provider.availableNodeServers();
+      var nodes = this.provider.nodeServers();
       // only publish the update if the local node is ready
       if (localNode.state() == NodeServerState.READY) {
         // update the local snapshot
@@ -43,8 +43,11 @@ public record LocalNodeUpdateTask(@NonNull DefaultNodeServerProvider provider) i
         // we include all remote nodes which are available and not the local node
         // we do this to explicitly trigger the disconnect handling on the other node if needed
         var targetNodes = nodes.stream()
-          .filter(server -> server.state() == NodeServerState.READY)
           .filter(server -> server != localNode)
+          // we can not use NodeServer#available here as it also verifies that the node has already
+          // exchanged a node snapshot which must not be the case (as this task will trigger the
+          // initial exchange of a node snapshot)
+          .filter(server -> server.state() == NodeServerState.READY)
           .map(server -> server.info().uniqueId())
           .toList();
         if (!targetNodes.isEmpty()) {
