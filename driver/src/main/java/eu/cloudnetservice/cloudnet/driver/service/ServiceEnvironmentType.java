@@ -95,6 +95,10 @@ public class ServiceEnvironmentType extends JsonDocPropertyHolder implements Nam
     .addDefaultProcessArguments(Set.of("nogui"))
     .properties(JsonDocument.newDocument().property(JAVA_SERVER, true))
     .build();
+  public static final ServiceEnvironmentType MINESTOM_SERVER = ServiceEnvironmentType.builder()
+    .name("MINESTOM_SERVER")
+    .properties(JsonDocument.newDocument().property(JAVA_SERVER, true).property(PLUGIN_DIR, "extensions"))
+    .build();
   /**
    * The default modded server service environment type. This applies to all services which are wrapping a minecraft
    * server instance but allows mods to run on them, for example fabric (Java Edition server).

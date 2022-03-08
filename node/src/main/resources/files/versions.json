@@ -12,6 +12,16 @@
       }
     },
     {
+      "name": "MINESTOM_SERVER",
+      "defaultServiceStartPort": 44955,
+      "defaultProcessArguments": [
+      ],
+      "properties": {
+        "isJavaServer": true,
+        "pluginDir": "extensions"
+      }
+    },
+    {
       "name": "MODDED_MINECRAFT_SERVER",
       "defaultServiceStartPort": 44955,
       "defaultProcessArguments": [

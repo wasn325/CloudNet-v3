@@ -22,7 +22,7 @@ import eu.cloudnetservice.modules.npc.NPC.ClickAction;
 import java.util.Set;
 import lombok.NonNull;
 
-public interface PlatformSelectorEntity<L, P, M, I> {
+public interface PlatformSelectorEntity<L, W, P, M, I> {
 
   void spawn();
 
@@ -47,6 +47,8 @@ public interface PlatformSelectorEntity<L, P, M, I> {
   @NonNull NPC npc();
 
   @NonNull L location();
+
+  @NonNull W world();
 
   int entityId();
 

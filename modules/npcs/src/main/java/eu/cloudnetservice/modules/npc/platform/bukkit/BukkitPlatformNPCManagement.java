@@ -34,6 +34,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import lombok.NonNull;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -42,7 +43,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.util.NumberConversions;
 
-public class BukkitPlatformNPCManagement extends PlatformNPCManagement<Location, Player, ItemStack, Inventory> {
+public class BukkitPlatformNPCManagement extends PlatformNPCManagement<Location, World, Player, ItemStack, Inventory> {
 
   protected final Plugin plugin;
   protected final NPCPool npcPool;
@@ -131,14 +132,16 @@ public class BukkitPlatformNPCManagement extends PlatformNPCManagement<Location,
 
   @NonNull
   @Override
-  protected PlatformSelectorEntity<Location, Player, ItemStack, Inventory> createSelectorEntity(@NonNull NPC base) {
+  protected PlatformSelectorEntity<Location, World, Player, ItemStack, Inventory> createSelectorEntity(
+    @NonNull NPC base) {
     return base.npcType() == NPCType.ENTITY
       ? new EntityBukkitPlatformSelectorEntity(this, this.plugin, base)
       : new NPCBukkitPlatformSelector(this, this.plugin, base, this.npcPool);
   }
 
   @Override
-  public @NonNull WorldPosition toWorldPosition(@NonNull Location location, @NonNull String group) {
+  public @NonNull WorldPosition toWorldPosition(@NonNull Location location, @NonNull World world,
+    @NonNull String group) {
     Verify.verifyNotNull(location.getWorld(), "world unloaded");
     return new WorldPosition(
       location.getX(),
