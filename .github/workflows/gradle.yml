@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Get branch name
         id: branch-name
@@ -39,7 +39,7 @@ jobs:
 
       - name: Publish updater metadata
         uses: s0/git-publish-subdir-action@develop
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ github.event_name == 'push' && !startsWith(github.ref, 'refs/heads/renovate/') }}
         env:
           REPO: git@github.com:CloudNetService/launchermeta.git
           BRANCH: ${{ steps.branch-name.outputs.current_branch }}
@@ -78,7 +78,7 @@ jobs:
           find plugins/ -type f -regex '.*/build/libs/.*\.jar' ! -name '*-javadoc.jar' ! -name '*-sources.jar' -exec cp {} temp/plugins \;
 
       - name: Upload artifacts zip
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: ${{ github.event_name == 'push' }}
         with:
           name: CloudNet
