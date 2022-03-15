@@ -83,6 +83,8 @@ public final class NodeNPCManagement extends AbstractNPCManagement {
       CloudNetNPCModule.class,
       service -> this.protocolLibAvailable.get()
         && ServiceEnvironmentType.minecraftServer(service.serviceId().environment())
+        // Don't use Protocollib on Minestom Servers
+        && !service.serviceId().environment().name().equals("MINESTOM_SERVER")
         && this.npcConfiguration
         .entries()
         .stream()
