@@ -66,10 +66,10 @@ public final class NPCCommand extends Command {
 
   private static final List<String> NPC_TYPES = Arrays.stream(NPCType.values())
     .map(Enum::name)
-    .toList();
+    .collect(Collectors.toList());
   private static final List<String> CLICK_ACTIONS = Arrays.stream(ClickAction.values())
     .map(Enum::name)
-    .toList();
+    .collect(Collectors.toList());
   private static final Map<String, Integer> VALID_ITEM_SLOTS = ImmutableMap.<String, Integer>builder()
     .put("MAIN_HAND", 0)
     .put("OFF_HAND", 1)

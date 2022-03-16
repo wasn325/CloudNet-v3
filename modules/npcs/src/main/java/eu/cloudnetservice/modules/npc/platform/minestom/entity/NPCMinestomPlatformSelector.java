@@ -29,11 +29,11 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.timer.TaskSchedule;
 
-public class NPCPlatformSelector extends MinestomPlatformSelectorEntity {
+public class NPCMinestomPlatformSelector extends MinestomPlatformSelectorEntity {
 
   protected volatile FakePlayer entity;
 
-  public NPCPlatformSelector(
+  public NPCMinestomPlatformSelector(
     @NonNull MinestomPlatformNPCManagement npcManagement,
     @NonNull Extension extension, @NonNull NPC npc) {
     super(npcManagement, extension, npc);

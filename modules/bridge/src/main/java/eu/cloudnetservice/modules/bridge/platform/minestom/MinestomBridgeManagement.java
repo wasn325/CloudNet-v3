@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -137,6 +138,6 @@ public class MinestomBridgeManagement extends PlatformBridgeManagement<Player, N
     // players
     snapshot.properties().append("Players", MinecraftServer.getConnectionManager().getOnlinePlayers().stream()
       .map(this::createPlayerInformation)
-      .toList());
+      .collect(Collectors.toList()));
   }
 }

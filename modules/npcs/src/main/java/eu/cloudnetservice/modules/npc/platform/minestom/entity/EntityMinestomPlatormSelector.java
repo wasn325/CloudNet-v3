@@ -27,11 +27,11 @@ import net.minestom.server.entity.metadata.villager.VillagerMeta.Profession;
 import net.minestom.server.entity.metadata.villager.VillagerMeta.VillagerData;
 import net.minestom.server.extensions.Extension;
 
-public class EntityPlatormSelector extends MinestomPlatformSelectorEntity {
+public class EntityMinestomPlatormSelector extends MinestomPlatformSelectorEntity {
 
   protected volatile LivingEntity entity;
 
-  public EntityPlatormSelector(
+  public EntityMinestomPlatormSelector(
     @NonNull MinestomPlatformNPCManagement npcManagement,
     @NonNull Extension extension, @NonNull NPC npc) {
     super(npcManagement, extension, npc);
