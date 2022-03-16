@@ -58,7 +58,7 @@ nukkitX = "1.0-SNAPSHOT"
 sponge = "9.0.0-SNAPSHOT"
 spigot = "1.8.8-R0.1-SNAPSHOT"
 bungeecord = "1.18-R0.1-SNAPSHOT"
-minestom = "2e02dfd4d8"
+minestom = "8cf598d290"
 
 # platform extensions
 vault = "1.7.1"
