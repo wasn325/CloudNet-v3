@@ -28,9 +28,9 @@ import eu.cloudnetservice.cloudnet.node.console.animation.setup.ConsoleSetupAnim
 import eu.cloudnetservice.cloudnet.node.console.animation.setup.answer.Parsers;
 import eu.cloudnetservice.cloudnet.node.console.animation.setup.answer.QuestionAnswerType;
 import eu.cloudnetservice.cloudnet.node.console.animation.setup.answer.QuestionListEntry;
-import eu.cloudnetservice.cloudnet.node.template.install.InstallInformation;
-import eu.cloudnetservice.cloudnet.node.template.install.ServiceVersion;
-import eu.cloudnetservice.cloudnet.node.template.install.ServiceVersionType;
+import eu.cloudnetservice.cloudnet.node.version.ServiceVersion;
+import eu.cloudnetservice.cloudnet.node.version.ServiceVersionType;
+import eu.cloudnetservice.cloudnet.node.version.information.TemplateVersionInstaller;
 import java.util.Set;
 import lombok.NonNull;
 
@@ -136,23 +136,23 @@ public class SpecificTaskSetup extends DefaultTaskSetup implements DefaultSetup 
       .addTemplates(Set.of(defaultTemplate))
       .nameSplitter(animation.result("taskNameSplitter"))
       .build();
-    CloudNet.instance().serviceTaskProvider().addServiceTask(task);
-    // create a group with the same name
-    var groupConfiguration = GroupConfiguration.builder().name(name).build();
-    CloudNet.instance().groupConfigurationProvider().addGroupConfiguration(groupConfiguration);
-
     // create the default template for the task
     this.initializeTemplate(defaultTemplate, environment, true);
     // check if the user chose to install a version
     if (version != null) {
       // install the chosen version
-      CloudNet.instance().serviceVersionProvider().installServiceVersion(InstallInformation.builder()
+      CloudNet.instance().serviceVersionProvider().installServiceVersion(TemplateVersionInstaller.builder()
         .serviceVersionType(version.first())
         .serviceVersion(version.second())
         .toTemplate(defaultTemplate)
         .executable(javaVersion.first())
         .build(), false);
     }
+    // add the task after the template is created
+    CloudNet.instance().serviceTaskProvider().addServiceTask(task);
+    // create a group with the same name
+    var groupConfiguration = GroupConfiguration.builder().name(name).build();
+    CloudNet.instance().groupConfigurationProvider().addGroupConfiguration(groupConfiguration);
     LOGGER.info(I18n.trans("command-tasks-setup-create-success", task.name()));
   }
 }

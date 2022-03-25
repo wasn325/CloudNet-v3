@@ -38,7 +38,7 @@ import lombok.NonNull;
 
 @CommandAlias("npcs")
 @CommandPermission("cloudnet.command.npc")
-@Description("")
+@Description("Create new npc configurations")
 public class CommandNPC {
 
   private static final RowBasedFormatter<NPCConfigurationEntry> ENTRY_LIST_FORMATTER = RowBasedFormatter.<NPCConfigurationEntry>
@@ -54,7 +54,7 @@ public class CommandNPC {
   }
 
   @Parser(name = "newConfiguration", suggestions = "newConfiguration")
-  public String newConfigurationParser(CommandContext<CommandSource> $, Queue<String> input) {
+  public String newConfigurationParser(@NonNull CommandContext<CommandSource> $, @NonNull Queue<String> input) {
     var name = input.remove();
     var configuration = CloudNet.instance().groupConfigurationProvider()
       .groupConfiguration(name);
@@ -71,20 +71,20 @@ public class CommandNPC {
   }
 
   @Suggestions("newConfiguration")
-  public List<String> suggestNewConfigurations(CommandContext<CommandSource> $, String input) {
+  public List<String> suggestNewConfigurations(@NonNull CommandContext<CommandSource> $, @NonNull String input) {
     return this.npcManagement.npcConfiguration().entries().stream().map(NPCConfigurationEntry::targetGroup).toList();
   }
 
   @CommandMethod("npc|npcs list|l")
-  public void listConfiguration(CommandSource source) {
+  public void listConfiguration(@NonNull CommandSource source) {
     source.sendMessage(ENTRY_LIST_FORMATTER.format(this.npcManagement.npcConfiguration().entries()));
   }
 
   @CommandMethod("npc|npcs create entry <targetGroup>")
-  public void createEntry(CommandSource source, @Argument("targetGroup") String targetGroup) {
+  public void createEntry(@NonNull CommandSource source, @NonNull @Argument("targetGroup") String targetGroup) {
     var entry = NPCConfigurationEntry.builder().targetGroup(targetGroup).build();
     this.npcManagement.npcConfiguration().entries().add(entry);
     this.npcManagement.npcConfiguration(this.npcManagement.npcConfiguration());
-    source.sendMessage(I18n.trans("module-npcs-command-create-entry-success"));
+    source.sendMessage(I18n.trans("module-npc-command-create-entry-success"));
   }
 }
