@@ -16,296 +16,216 @@
 
 package eu.cloudnetservice.modules.signs.configuration;
 
+import com.google.common.base.Verify;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import lombok.NonNull;
+import org.jetbrains.annotations.Nullable;
 
-public class SignConfigurationEntry implements Cloneable {
+public record SignConfigurationEntry(
+  @NonNull String targetGroup,
+  boolean switchToSearchingWhenServiceIsFull,
+  @NonNull KnockbackConfiguration knockbackConfiguration,
+  @NonNull List<SignGroupConfiguration> groupConfigurations,
+  @NonNull SignLayoutsHolder searchingLayout,
+  @NonNull SignLayoutsHolder startingLayout,
+  @NonNull SignLayoutsHolder emptyLayout,
+  @NonNull SignLayoutsHolder onlineLayout,
+  @NonNull SignLayoutsHolder fullLayout
+) {
 
-  protected String targetGroup;
-  protected boolean switchToSearchingWhenServiceIsFull;
-  protected KnockbackConfiguration knockbackConfiguration;
-
-  protected List<SignGroupConfiguration> groupConfigurations;
-
-  protected SignLayoutsHolder searchingLayout;
-  protected SignLayoutsHolder startingLayout;
-  protected SignLayoutsHolder emptyLayout;
-  protected SignLayoutsHolder onlineLayout;
-  protected SignLayoutsHolder fullLayout;
-
-  public SignConfigurationEntry() {
+  public static @NonNull SignConfigurationEntry createDefault(
+    @NonNull String targetGroup,
+    @NonNull String onlineBlockType,
+    @NonNull String fullBlockType,
+    @NonNull String startingBlock,
+    @NonNull String searchingBlock
+  ) {
+    return SignConfigurationEntry.builder()
+      .targetGroup(targetGroup)
+      .groupConfigurations(List.of(SignGroupConfiguration.builder()
+        .targetGroup("TARGET_GROUP")
+        .emptyLayout(SignLayoutsHolder.singleLayout(SignLayout.builder()
+          .lines("&7Lobby &0- &7%task_id%", "&8[&7LOBBY&8]", "%online_players% / %max_players%", "%motd%")
+          .blockMaterial(onlineBlockType)
+          .build()))
+        .onlineLayout(SignLayoutsHolder.singleLayout(SignLayout.builder()
+          .lines("&eLobby &0- &e%task_id%", "&8[&eLOBBY&8]", "%online_players% / %max_players%", "%motd%")
+          .blockMaterial(onlineBlockType)
+          .build()))
+        .fullLayout(SignLayoutsHolder.singleLayout(SignLayout.builder()
+          .lines("&6Lobby &0- &6%task_id%", "&8[&6PRIME&8]", "%online_players% / %max_players%", "%motd%")
+          .blockMaterial(onlineBlockType)
+          .build()))
+        .build()))
+      .searchingLayout(defaultLayout("Waiting", searchingBlock))
+      .startingLayout(defaultLayout("Starting", startingBlock))
+      .emptyLayout(defaultLayout("&8[&7LOBBY&8]", onlineBlockType))
+      .onlineLayout(defaultLayout("&8[&eLOBBY&8]", onlineBlockType))
+      .fullLayout(defaultLayout("&8[&6&lLOBBY&8]", fullBlockType))
+      .build();
   }
 
-  public SignConfigurationEntry(String targetGroup, boolean switchToSearchingWhenServiceIsFull,
-    KnockbackConfiguration knockbackConfiguration,
-    List<SignGroupConfiguration> groupConfigurations, SignLayoutsHolder searchingLayout,
-    SignLayoutsHolder startingLayout,
-    SignLayoutsHolder emptyLayout, SignLayoutsHolder onlineLayout, SignLayoutsHolder fullLayout) {
-    this.targetGroup = targetGroup;
-    this.switchToSearchingWhenServiceIsFull = switchToSearchingWhenServiceIsFull;
-    this.knockbackConfiguration = knockbackConfiguration;
-    this.groupConfigurations = groupConfigurations;
-    this.searchingLayout = searchingLayout;
-    this.startingLayout = startingLayout;
-    this.emptyLayout = emptyLayout;
-    this.onlineLayout = onlineLayout;
-    this.fullLayout = fullLayout;
+  public static @NonNull Builder builder() {
+    return new Builder();
   }
 
-  public static @NonNull SignConfigurationEntry createDefault(String targetGroup, String onlineBlockType,
-    String fullBlockType, String startingBlock, String searchingBlock) {
-    return new SignConfigurationEntry(
-      targetGroup,
-      false,
-      new KnockbackConfiguration(1, 0.8),
-      new ArrayList<>(Collections.singleton(new SignGroupConfiguration(
-        "Target_Group",
-        new SignLayoutsHolder(1, new ArrayList<>(Collections.singleton(new SignLayout(
-          new String[]{
-            "&7Lobby &0- &7%task_id%",
-            "&8[&7LOBBY&8]",
-            "%online_players% / %max_players%",
-            "%motd%"
-          }, onlineBlockType, -1, null)
-        ))), new SignLayoutsHolder(1, new ArrayList<>(Collections.singleton(new SignLayout(
-        new String[]{
-          "&eLobby &0- &e%task_id%",
-          "&8[&eLOBBY&8]",
-          "%online_players% / %max_players%",
-          "%motd%"
-        }, onlineBlockType, -1, "LIME")
-      ))), new SignLayoutsHolder(1, new ArrayList<>(Collections.singleton(new SignLayout(
-        new String[]{
-          "&6Lobby &0- &6%task_id%",
-          "&8[&6PRIME&8]",
-          "%online_players% / %max_players%",
-          "%motd%"
-        }, fullBlockType, -1, "ORANGE")
-      )))))), new SignLayoutsHolder(
-      2,
-      new ArrayList<>(Arrays.asList(
-        createLayout("Waiting", searchingBlock, 1),
-        createLayout("Waiting", searchingBlock, 1),
-        createLayout("Waiting", searchingBlock, 2),
-        createLayout("Waiting", searchingBlock, 2),
-        createLayout("Waiting", searchingBlock, 3),
-        createLayout("Waiting", searchingBlock, 3)
-      ))
-    ), new SignLayoutsHolder(
-      2,
-      new ArrayList<>(Arrays.asList(
-        createLayout("Starting", startingBlock, 1),
-        createLayout("Starting", startingBlock, 1),
-        createLayout("Starting", startingBlock, 2),
-        createLayout("Starting", startingBlock, 2),
-        createLayout("Starting", startingBlock, 3),
-        createLayout("Starting", startingBlock, 3)
-      ))), new SignLayoutsHolder(
-      2,
-      new ArrayList<>(Arrays.asList(
-        createLayout("&8[&7LOBBY&8]", startingBlock, 1),
-        createLayout("&8[&7LOBBY&8]", startingBlock, 1),
-        createLayout("&8[&7LOBBY&8]", startingBlock, 2),
-        createLayout("&8[&7LOBBY&8]", startingBlock, 2),
-        createLayout("&8[&7LOBBY&8]", startingBlock, 3),
-        createLayout("&8[&7LOBBY&8]", startingBlock, 3)
-      ))), new SignLayoutsHolder(
-      2,
-      new ArrayList<>(Arrays.asList(
-        createLayout("&8[&eLOBBY&8]", startingBlock, 1),
-        createLayout("&8[&eLOBBY&8]", startingBlock, 1),
-        createLayout("&8[&eLOBBY&8]", startingBlock, 2),
-        createLayout("&8[&eLOBBY&8]", startingBlock, 2),
-        createLayout("&8[&eLOBBY&8]", startingBlock, 3),
-        createLayout("&8[&eLOBBY&8]", startingBlock, 3)
-      ))), new SignLayoutsHolder(
-      2,
-      new ArrayList<>(Arrays.asList(
-        createLayout("&8[&6&lLOBBY&8]", startingBlock, 1),
-        createLayout("&8[&6&lLOBBY&8]", startingBlock, 1),
-        createLayout("&8[&6&lLOBBY&8]", startingBlock, 2),
-        createLayout("&8[&6&lLOBBY&8]", startingBlock, 2),
-        createLayout("&8[&6&lLOBBY&8]", startingBlock, 3),
-        createLayout("&8[&6&lLOBBY&8]", startingBlock, 3)
-      )))
-    );
+  public static @NonNull Builder builder(@NonNull SignConfigurationEntry entry) {
+    return builder()
+      .targetGroup(entry.targetGroup())
+      .switchToSearchingWhenServiceIsFull(entry.switchToSearchingWhenServiceIsFull())
+      .knockbackConfiguration(entry.knockbackConfiguration())
+      .groupConfigurations(entry.groupConfigurations())
+      .searchingLayout(entry.searchingLayout())
+      .startingLayout(entry.startingLayout())
+      .emptyLayout(entry.emptyLayout())
+      .onlineLayout(entry.onlineLayout())
+      .fullLayout(entry.fullLayout());
   }
 
-  protected static @NonNull SignLayout createLayout(String firstLine, String block, int amount) {
-    return new SignLayout(
-      new String[]{
-        "",
-        firstLine,
-        ".".repeat(amount),
-        ""
-      }, block, -1, null);
+  private static @NonNull SignLayoutsHolder defaultLayout(
+    @NonNull String firstLine,
+    @NonNull String block
+  ) {
+    List<SignLayout> signLayouts = new ArrayList<>(3);
+    for (int i = 1; i <= 3; i++) {
+      signLayouts.add(SignLayout.builder()
+        .lines("", firstLine, ".".repeat(i), "")
+        .blockMaterial(block)
+        .build());
+    }
+    return new SignLayoutsHolder(1, signLayouts);
   }
 
-  public String targetGroup() {
-    return this.targetGroup;
-  }
+  public static class Builder {
 
-  public void targetGroup(String targetGroup) {
-    this.targetGroup = targetGroup;
-  }
+    private String targetGroup;
+    private boolean switchToSearchingWhenServiceIsFull;
+    private KnockbackConfiguration knockbackConfiguration = KnockbackConfiguration.builder().build();
+    private List<SignGroupConfiguration> groupConfigurations = new ArrayList<>();
+    private SignLayoutsHolder searchingLayout;
+    private SignLayoutsHolder startingLayout;
+    private SignLayoutsHolder emptyLayout;
+    private SignLayoutsHolder onlineLayout;
+    private SignLayoutsHolder fullLayout;
 
-  public boolean switchToSearchingWhenServiceIsFull() {
-    return this.switchToSearchingWhenServiceIsFull;
-  }
+    public @NonNull Builder targetGroup(@NonNull String targetGroup) {
+      this.targetGroup = targetGroup;
+      return this;
+    }
 
-  public void switchToSearchingWhenServiceIsFull(boolean switchToSearchingWhenServiceIsFull) {
-    this.switchToSearchingWhenServiceIsFull = switchToSearchingWhenServiceIsFull;
-  }
+    public @NonNull Builder switchToSearchingWhenServiceIsFull(boolean switchToSearchingWhenServiceIsFull) {
+      this.switchToSearchingWhenServiceIsFull = switchToSearchingWhenServiceIsFull;
+      return this;
+    }
 
-  public KnockbackConfiguration knockbackConfiguration() {
-    return this.knockbackConfiguration;
-  }
+    public @NonNull Builder knockbackConfiguration(@NonNull KnockbackConfiguration knockbackConfiguration) {
+      this.knockbackConfiguration = knockbackConfiguration;
+      return this;
+    }
 
-  public void knockbackConfiguration(KnockbackConfiguration knockbackConfiguration) {
-    this.knockbackConfiguration = knockbackConfiguration;
-  }
+    public @NonNull Builder groupConfigurations(@NonNull List<SignGroupConfiguration> groupConfigurations) {
+      this.groupConfigurations = new ArrayList<>(groupConfigurations);
+      return this;
+    }
 
-  public List<SignGroupConfiguration> groupConfigurations() {
-    return this.groupConfigurations;
-  }
+    public @NonNull Builder searchingLayout(@NonNull SignLayoutsHolder searchingLayout) {
+      this.searchingLayout = searchingLayout;
+      return this;
+    }
 
-  public void groupConfigurations(List<SignGroupConfiguration> groupConfigurations) {
-    this.groupConfigurations = groupConfigurations;
-  }
+    public @NonNull Builder startingLayout(@NonNull SignLayoutsHolder startingLayout) {
+      this.startingLayout = startingLayout;
+      return this;
+    }
 
-  public SignLayoutsHolder searchingLayout() {
-    return this.searchingLayout;
-  }
+    public @NonNull Builder emptyLayout(@NonNull SignLayoutsHolder emptyLayout) {
+      this.emptyLayout = emptyLayout;
+      return this;
+    }
 
-  public void searchingLayout(SignLayoutsHolder searchingLayout) {
-    this.searchingLayout = searchingLayout;
-  }
+    public @NonNull Builder onlineLayout(@NonNull SignLayoutsHolder onlineLayout) {
+      this.onlineLayout = onlineLayout;
+      return this;
+    }
 
-  public SignLayoutsHolder startingLayout() {
-    return this.startingLayout;
-  }
+    public @NonNull Builder fullLayout(@NonNull SignLayoutsHolder fullLayout) {
+      this.fullLayout = fullLayout;
+      return this;
+    }
 
-  public void startingLayout(SignLayoutsHolder startingLayout) {
-    this.startingLayout = startingLayout;
-  }
+    public @NonNull SignConfigurationEntry build() {
+      Verify.verifyNotNull(this.targetGroup, "Missing target group");
+      Verify.verifyNotNull(this.searchingLayout, "Missing searching layout");
+      Verify.verifyNotNull(this.startingLayout, "Missing starting layout");
+      Verify.verifyNotNull(this.emptyLayout, "Missing empty layout");
+      Verify.verifyNotNull(this.onlineLayout, "Missing online layout");
+      Verify.verifyNotNull(this.fullLayout, "Missing full layout");
 
-  public SignLayoutsHolder emptyLayout() {
-    return this.emptyLayout;
-  }
-
-  public void emptyLayout(SignLayoutsHolder emptyLayout) {
-    this.emptyLayout = emptyLayout;
-  }
-
-  public SignLayoutsHolder onlineLayout() {
-    return this.onlineLayout;
-  }
-
-  public void onlineLayout(SignLayoutsHolder onlineLayout) {
-    this.onlineLayout = onlineLayout;
-  }
-
-  public SignLayoutsHolder fullLayout() {
-    return this.fullLayout;
-  }
-
-  public void fullLayout(SignLayoutsHolder fullLayout) {
-    this.fullLayout = fullLayout;
-  }
-
-  @Override
-  public SignConfigurationEntry clone() {
-    try {
-      var clone = (SignConfigurationEntry) super.clone();
-      return clone;
-    } catch (CloneNotSupportedException e) {
       return new SignConfigurationEntry(
         this.targetGroup,
         this.switchToSearchingWhenServiceIsFull,
-        this.knockbackConfiguration.clone(),
-        new ArrayList<>(this.groupConfigurations),
+        this.knockbackConfiguration,
+        this.groupConfigurations,
         this.searchingLayout,
         this.startingLayout,
         this.emptyLayout,
         this.onlineLayout,
-        this.fullLayout
-      );
+        this.fullLayout);
     }
   }
 
-  public static class KnockbackConfiguration implements Cloneable {
+  public record KnockbackConfiguration(
+    boolean enabled,
+    double distance,
+    double strength,
+    @Nullable String bypassPermission
+  ) {
 
-    protected static final KnockbackConfiguration DEFAULT = new KnockbackConfiguration(true, 1,
-      0.8, "cloudnet.signs.knockback.bypass");
-    protected static final KnockbackConfiguration DISABLED = new KnockbackConfiguration(false, 1, 0.8);
-
-    protected boolean enabled;
-    protected double distance;
-    protected double strength;
-    protected String bypassPermission;
-
-    public KnockbackConfiguration() {
+    public static Builder builder() {
+      return new Builder();
     }
 
-    public KnockbackConfiguration(double distance, double strength) {
-      this(true, distance, strength);
-    }
-
-    public KnockbackConfiguration(boolean enabled, double distance, double strength) {
-      this(enabled, distance, strength, "cloudnet.signs.knockback.bypass");
-    }
-
-    public KnockbackConfiguration(boolean enabled, double distance, double strength, String bypassPermission) {
-      this.enabled = enabled;
-      this.distance = distance;
-      this.strength = strength;
-      this.bypassPermission = bypassPermission;
-    }
-
-    public boolean enabled() {
-      return this.enabled;
-    }
-
-    public void enabled(boolean enabled) {
-      this.enabled = enabled;
-    }
-
-    public double distance() {
-      return this.distance;
-    }
-
-    public void distance(double distance) {
-      this.distance = distance;
-    }
-
-    public double strength() {
-      return this.strength;
-    }
-
-    public void strength(double strength) {
-      this.strength = strength;
-    }
-
-    public String bypassPermission() {
-      return this.bypassPermission;
-    }
-
-    public void bypassPermission(String bypassPermission) {
-      this.bypassPermission = bypassPermission;
+    public static Builder builder(@NonNull KnockbackConfiguration configuration) {
+      return builder()
+        .enabled(configuration.enabled())
+        .distance(configuration.distance())
+        .strength(configuration.strength())
+        .bypassPermission(configuration.bypassPermission());
     }
 
     public boolean validAndEnabled() {
       return this.enabled && this.strength > 0 && this.distance > 0;
     }
 
-    @Override
-    public KnockbackConfiguration clone() {
-      try {
-        return (KnockbackConfiguration) super.clone();
-      } catch (CloneNotSupportedException exception) {
+    public static class Builder {
+
+      private boolean enabled = true;
+      private double distance = 1;
+      private double strength = 0.8;
+      private String bypassPermission = "cloudnet.signs.knockback.bypass";
+
+      public @NonNull Builder enabled(boolean enabled) {
+        this.enabled = enabled;
+        return this;
+      }
+
+      public @NonNull Builder distance(double distance) {
+        this.distance = distance;
+        return this;
+      }
+
+      public @NonNull Builder strength(double strength) {
+        this.strength = strength;
+        return this;
+      }
+
+      public @NonNull Builder bypassPermission(@Nullable String bypassPermission) {
+        this.bypassPermission = bypassPermission;
+        return this;
+      }
+
+      public @NonNull KnockbackConfiguration build() {
         return new KnockbackConfiguration(this.enabled, this.distance, this.strength, this.bypassPermission);
       }
     }

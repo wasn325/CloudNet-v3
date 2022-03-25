@@ -18,7 +18,6 @@ import org.cadixdev.gradle.licenser.LicenseExtension
 
 plugins {
   id("cloudnet.parent-build-logic")
-  alias(libs.plugins.versions)
   alias(libs.plugins.licenser)
   alias(libs.plugins.nexusPublish)
 }
@@ -69,6 +68,7 @@ subprojects {
     // testing
     "testImplementation"(rootProject.libs.bundles.junit)
     "testImplementation"(rootProject.libs.bundles.mockito)
+    "testImplementation"(rootProject.libs.bundles.testContainers)
   }
 
   tasks.withType<Jar> {
@@ -81,6 +81,8 @@ subprojects {
     testLogging {
       events("started", "passed", "skipped", "failed")
     }
+    // always pass down all given system properties
+    systemProperties(System.getProperties().mapKeys { it.key.toString() })
   }
 
   tasks.withType<JavaCompile> {

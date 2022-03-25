@@ -17,42 +17,35 @@
 package eu.cloudnetservice.modules.signs.configuration;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import lombok.NonNull;
 import lombok.ToString;
 
 @ToString
 public class SignLayoutsHolder {
 
-  protected int animationsPerSecond;
-  protected List<SignLayout> signLayouts;
+  private final int animationsPerSecond;
+  private final List<SignLayout> signLayouts;
 
-  protected transient AtomicBoolean tickBlocked;
-  protected transient AtomicInteger currentAnimation;
+  private final transient AtomicBoolean tickBlocked = new AtomicBoolean();
+  private final transient AtomicInteger currentAnimation = new AtomicInteger(-1);
 
-  public SignLayoutsHolder() {
-  }
-
-  public SignLayoutsHolder(int animationsPerSecond, List<SignLayout> signLayouts) {
+  public SignLayoutsHolder(int animationsPerSecond, @NonNull List<SignLayout> signLayouts) {
     this.animationsPerSecond = animationsPerSecond;
     this.signLayouts = signLayouts;
+  }
+
+  public static @NonNull SignLayoutsHolder singleLayout(@NonNull SignLayout layout) {
+    return new SignLayoutsHolder(1, List.of(layout));
   }
 
   public int animationsPerSecond() {
     return this.animationsPerSecond;
   }
 
-  public void animationsPerSecond(int animationsPerSecond) {
-    this.animationsPerSecond = animationsPerSecond;
-  }
-
-  public List<SignLayout> signLayouts() {
+  public @NonNull List<SignLayout> signLayouts() {
     return this.signLayouts;
-  }
-
-  public void signLayouts(List<SignLayout> signLayouts) {
-    this.signLayouts = signLayouts;
   }
 
   public boolean hasLayouts() {
@@ -60,42 +53,32 @@ public class SignLayoutsHolder {
   }
 
   public boolean tickBlocked() {
-    return this.tickBlocked != null && this.tickBlocked.get();
+    return this.tickBlocked.get();
   }
 
   public void enableTickBlock() {
-    if (this.tickBlocked == null) {
-      this.tickBlocked = new AtomicBoolean();
-    }
     this.tickBlocked.set(true);
   }
 
-  public SignLayoutsHolder releaseTickBlock() {
-    if (this.tickBlocked != null) {
-      this.tickBlocked.set(false);
-    }
+  public @NonNull SignLayoutsHolder releaseTickBlock() {
+    this.tickBlocked.set(false);
     return this;
   }
 
-  public SignLayout currentLayout() {
+  public @NonNull SignLayout currentLayout() {
     return this.signLayouts().get(this.currentAnimation());
   }
 
-  public SignLayoutsHolder tick() {
+  public @NonNull SignLayoutsHolder tick() {
     if (!this.tickBlocked()) {
-      var currentIndex = this.currentAnimationIndexOrInit();
-      if (currentIndex.incrementAndGet() >= this.signLayouts.size()) {
-        currentIndex.set(0);
+      if (this.currentAnimation.incrementAndGet() >= this.signLayouts.size()) {
+        this.currentAnimation.set(0);
       }
     }
     return this;
   }
 
   public int currentAnimation() {
-    return this.currentAnimation == null ? 0 : this.currentAnimation.get();
-  }
-
-  protected AtomicInteger currentAnimationIndexOrInit() {
-    return Objects.requireNonNullElseGet(this.currentAnimation, () -> this.currentAnimation = new AtomicInteger(-1));
+    return Math.max(0, this.currentAnimation.get());
   }
 }
