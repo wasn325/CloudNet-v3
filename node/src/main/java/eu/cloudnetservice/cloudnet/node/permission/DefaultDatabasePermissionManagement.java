@@ -23,6 +23,7 @@ import eu.cloudnetservice.cloudnet.driver.permission.PermissionGroup;
 import eu.cloudnetservice.cloudnet.driver.permission.PermissionManagement;
 import eu.cloudnetservice.cloudnet.driver.permission.PermissionUser;
 import eu.cloudnetservice.cloudnet.node.CloudNet;
+import eu.cloudnetservice.cloudnet.node.cluster.sync.DataSyncHandler;
 import eu.cloudnetservice.cloudnet.node.database.LocalDatabase;
 import eu.cloudnetservice.cloudnet.node.network.listener.message.PermissionChannelMessageListener;
 import eu.cloudnetservice.cloudnet.node.permission.command.PermissionUserCommandSource;
@@ -59,10 +60,20 @@ public class DefaultDatabasePermissionManagement extends DefaultPermissionManage
     this.nodeInstance = nodeInstance;
     this.groups = new ConcurrentHashMap<>();
     this.networkListener = new PermissionChannelMessageListener(nodeInstance.eventManager(), this);
+    // sync permission groups into the cluster
+    CloudNet.instance().dataSyncRegistry().registerHandler(DataSyncHandler.<PermissionGroup>builder()
+      .alwaysForce()
+      .key("perms-groups")
+      .nameExtractor(PermissionGroup::name)
+      .convertObject(PermissionGroup.class)
+      .dataCollector(() -> CloudNet.instance().permissionManagement().groups())
+      .writer(group -> CloudNet.instance().permissionManagement().addGroupSilently(group))
+      .currentGetter(group -> CloudNet.instance().permissionManagement().group(group.name()))
+      .build());
   }
 
   @Override
-  public @Nullable PermissionUser firstUser(String name) {
+  public @Nullable PermissionUser firstUser(@NonNull String name) {
     return Iterables.getFirst(this.usersByName(name), null);
   }
 
@@ -101,7 +112,7 @@ public class DefaultDatabasePermissionManagement extends DefaultPermissionManage
   }
 
   @Override
-  public @NonNull PermissionUser addUser(@NonNull String name, @NonNull String password, int potency) {
+  public @NonNull PermissionUser addPermissionUser(@NonNull String name, @NonNull String password, int potency) {
     return this.addPermissionUser(PermissionUser.builder()
       .name(name)
       .uniqueId(UUID.randomUUID())
@@ -111,8 +122,8 @@ public class DefaultDatabasePermissionManagement extends DefaultPermissionManage
   }
 
   @Override
-  public @NonNull PermissionGroup addGroup(@NonNull String role, int potency) {
-    return this.addPermissionGroup(PermissionGroup.builder().name(role).potency(potency).build());
+  public @NonNull PermissionGroup addPermissionGroup(@NonNull String name, int potency) {
+    return this.addPermissionGroup(PermissionGroup.builder().name(name).potency(potency).build());
   }
 
   @Override

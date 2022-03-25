@@ -16,51 +16,74 @@
 
 package eu.cloudnetservice.modules.signs.configuration;
 
-public class SignGroupConfiguration implements Cloneable {
+import com.google.common.base.Verify;
+import lombok.NonNull;
 
-  protected String targetGroup;
+public record SignGroupConfiguration(
+  @NonNull String targetGroup,
+  boolean switchToSearchingWhenServiceIsFull,
+  @NonNull SignLayoutsHolder emptyLayout,
+  @NonNull SignLayoutsHolder onlineLayout,
+  @NonNull SignLayoutsHolder fullLayout) {
 
-  protected SignLayoutsHolder emptyLayout;
-  protected SignLayoutsHolder onlineLayout;
-  protected SignLayoutsHolder fullLayout;
-
-  public SignGroupConfiguration() {
+  public static @NonNull Builder builder() {
+    return new Builder();
   }
 
-  public SignGroupConfiguration(
-    String targetGroup,
-    SignLayoutsHolder emptyLayout,
-    SignLayoutsHolder onlineLayout,
-    SignLayoutsHolder fullLayout
-  ) {
-    this.targetGroup = targetGroup;
-    this.emptyLayout = emptyLayout;
-    this.onlineLayout = onlineLayout;
-    this.fullLayout = fullLayout;
+  public static @NonNull Builder builder(@NonNull SignGroupConfiguration groupConfiguration) {
+    return builder()
+      .targetGroup(groupConfiguration.targetGroup())
+      .switchToSearchingWhenServiceIsFull(groupConfiguration.switchToSearchingWhenServiceIsFull())
+      .emptyLayout(groupConfiguration.emptyLayout())
+      .onlineLayout(groupConfiguration.onlineLayout())
+      .fullLayout(groupConfiguration.fullLayout());
   }
 
-  public String targetGroup() {
-    return this.targetGroup;
-  }
+  public static class Builder {
 
-  public SignLayoutsHolder emptyLayout() {
-    return this.emptyLayout;
-  }
+    private String targetGroup;
+    private boolean switchToSearchingWhenServiceIsFull = false;
+    private SignLayoutsHolder emptyLayout;
+    private SignLayoutsHolder onlineLayout;
+    private SignLayoutsHolder fullLayout;
 
-  public SignLayoutsHolder onlineLayout() {
-    return this.onlineLayout;
-  }
+    public @NonNull Builder targetGroup(@NonNull String targetGroup) {
+      this.targetGroup = targetGroup;
+      return this;
+    }
 
-  public SignLayoutsHolder fullLayout() {
-    return this.fullLayout;
-  }
+    public @NonNull Builder switchToSearchingWhenServiceIsFull(boolean switchToSearchingWhenServiceIsFull) {
+      this.switchToSearchingWhenServiceIsFull = switchToSearchingWhenServiceIsFull;
+      return this;
+    }
 
-  @Override
-  public SignGroupConfiguration clone() {
-    try {
-      return (SignGroupConfiguration) super.clone();
-    } catch (CloneNotSupportedException e) {
-      return new SignGroupConfiguration(this.targetGroup, this.emptyLayout, this.onlineLayout, this.fullLayout);
+    public @NonNull Builder emptyLayout(@NonNull SignLayoutsHolder emptyLayout) {
+      this.emptyLayout = emptyLayout;
+      return this;
+    }
+
+    public @NonNull Builder onlineLayout(@NonNull SignLayoutsHolder onlineLayout) {
+      this.onlineLayout = onlineLayout;
+      return this;
+    }
+
+    public @NonNull Builder fullLayout(@NonNull SignLayoutsHolder fullLayout) {
+      this.fullLayout = fullLayout;
+      return this;
+    }
+
+    public @NonNull SignGroupConfiguration build() {
+      Verify.verifyNotNull(this.targetGroup, "Missing target group");
+      Verify.verifyNotNull(this.emptyLayout, "Missing empty sign layout");
+      Verify.verifyNotNull(this.onlineLayout, "Missing online sign layout");
+      Verify.verifyNotNull(this.fullLayout, "Missing full sign layout");
+
+      return new SignGroupConfiguration(
+        this.targetGroup,
+        this.switchToSearchingWhenServiceIsFull,
+        this.emptyLayout,
+        this.onlineLayout,
+        this.fullLayout);
     }
   }
 }

@@ -58,6 +58,8 @@ public class MongoDBDatabase extends AbstractDatabase {
 
   @Override
   public boolean insert(@NonNull String key, @NonNull JsonDocument document) {
+    this.databaseProvider.databaseHandler().handleInsert(this, key, document);
+
     return this.insertOrUpdate(key, document);
   }
 
@@ -79,6 +81,8 @@ public class MongoDBDatabase extends AbstractDatabase {
 
   @Override
   public boolean delete(@NonNull String key) {
+    this.databaseProvider.databaseHandler().handleDelete(this, key);
+
     return this.delete0(key);
   }
 
@@ -105,10 +109,13 @@ public class MongoDBDatabase extends AbstractDatabase {
 
   @Override
   public @NonNull List<JsonDocument> get(@NonNull JsonDocument filters) {
+    // the easiest way to prevent issues with json-to-json conversion is to use the in-build document of mongodb and
+    // then reconvert the values as we need them
     Collection<Bson> bsonFilters = new ArrayList<>();
-    for (var filter : filters) {
-      var value = filters.get(filter);
-      bsonFilters.add(this.valueEq(filter, value));
+    var document = Document.parse(filters.toString());
+    // easy part: convert each key of the document in a way that it matches the actual values written to the database
+    for (var entry : document.entrySet()) {
+      bsonFilters.add(this.valueEq(entry.getKey(), entry.getValue()));
     }
 
     List<JsonDocument> documents = new ArrayList<>();
@@ -171,6 +178,8 @@ public class MongoDBDatabase extends AbstractDatabase {
 
   @Override
   public void clear() {
+    this.databaseProvider.databaseHandler().handleClear(this);
+
     this.collection.deleteMany(new Document());
   }
 

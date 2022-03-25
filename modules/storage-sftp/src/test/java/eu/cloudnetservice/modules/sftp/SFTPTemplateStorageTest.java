@@ -16,22 +16,12 @@
 
 package eu.cloudnetservice.modules.sftp;
 
-import eu.cloudnetservice.cloudnet.common.io.FileUtil;
 import eu.cloudnetservice.cloudnet.driver.network.HostAndPort;
 import eu.cloudnetservice.cloudnet.driver.service.ServiceTemplate;
 import eu.cloudnetservice.cloudnet.driver.template.FileInfo;
 import eu.cloudnetservice.modules.sftp.config.SFTPTemplateStorageConfig;
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
-import org.apache.sshd.common.keyprovider.ClassLoadableResourceKeyPairProvider;
-import org.apache.sshd.server.SshServer;
-import org.apache.sshd.sftp.server.SftpSubsystemFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -39,84 +29,59 @@ import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 @TestMethodOrder(OrderAnnotation.class)
+@Testcontainers(disabledWithoutDocker = true)
 public final class SFTPTemplateStorageTest {
 
-  private static final int PORT;
-  private static final Path BASE_PATH = Path.of("").resolve("build").toAbsolutePath();
   private static final ServiceTemplate TEMPLATE = ServiceTemplate.builder()
     .prefix("global")
     .name("proxy")
     .storage("sftp")
     .build();
 
-  private static final Path TEMPLATE_PATH = FileUtil.resolve(BASE_PATH, "home", "CloudNet", "global", "proxy");
+  @Container
+  private static final GenericContainer<?> SFTP = new GenericContainer<>("atmoz/sftp:latest")
+    .withExposedPorts(22)
+    .withCommand("cloud:secret:::templates");
 
-  private static SshServer server;
   private static SFTPTemplateStorage storage;
 
-  static {
-    try (var socket = new ServerSocket(0)) {
-      PORT = socket.getLocalPort();
-    } catch (IOException exception) {
-      throw new ExceptionInInitializerError(exception);
-    }
-  }
-
   @BeforeAll
-  static void setupServer() throws IOException {
-    // init sftp
-    var fsFactory = new VirtualFileSystemFactory();
-    fsFactory.setDefaultHomeDir(BASE_PATH);
-
-    // init the ssh server
-    server = SshServer.setUpDefaultServer();
-    server.setPort(PORT);
-    server.setHost("127.0.0.1");
-    // setup auth
-    server.setKeyPairProvider(new ClassLoadableResourceKeyPairProvider("hostkey.pem"));
-    server.setPasswordAuthenticator((user, password, $1) -> user.equals("test") && password.equals("ThisIsATest!"));
-    // factories
-    server.setFileSystemFactory(fsFactory);
-    server.setSubsystemFactories(Collections.singletonList(new SftpSubsystemFactory()));
-    // start the server
-    server.start();
-
-    // init the storage
+  static void setupStorage() {
     storage = new SFTPTemplateStorage(new SFTPTemplateStorageConfig(
-      new HostAndPort("127.0.0.1", PORT),
+      new HostAndPort(SFTP.getHost(), SFTP.getFirstMappedPort()),
       "sftp",
-      "test",
-      "ThisIsATest!",
+      "cloud",
+      "secret",
       null,
       null,
       null,
-      "/home/CloudNet",
+      "templates",
       1));
   }
 
   @AfterAll
-  static void stopServer() throws IOException {
+  static void closeStorage() throws Exception {
     storage.close();
-    server.close(true).await();
-
-    FileUtil.delete(BASE_PATH.resolve("home"));
   }
 
   @Test
   @Order(0)
   void testTemplateCreation() {
     Assertions.assertTrue(storage.create(TEMPLATE));
-    Assertions.assertTrue(Files.exists(TEMPLATE_PATH));
-    Assertions.assertTrue(Files.isDirectory(TEMPLATE_PATH));
+    Assertions.assertTrue(storage.createFile(TEMPLATE, "spigot.yml"));
+    Assertions.assertTrue(storage.hasFile(TEMPLATE, "spigot.yml"));
   }
 
   @Test
   @Order(10)
   void testHasTemplate() {
-    Assertions.assertTrue(storage.has(TEMPLATE));
-    Assertions.assertFalse(storage.has(ServiceTemplate.builder()
+    Assertions.assertTrue(storage.contains(TEMPLATE));
+    Assertions.assertFalse(storage.contains(ServiceTemplate.builder()
       .prefix("hello")
       .name("world")
       .storage("sftp")
@@ -131,8 +96,11 @@ public final class SFTPTemplateStorageTest {
       stream.write("Hello".getBytes(StandardCharsets.UTF_8));
     }
 
-    Assertions.assertTrue(Files.exists(TEMPLATE_PATH.resolve("test.txt")));
-    Assertions.assertEquals("Hello", String.join("\n", Files.readAllLines(TEMPLATE_PATH.resolve("test.txt"))));
+    Assertions.assertTrue(storage.hasFile(TEMPLATE, "test.txt"));
+    try (var stream = storage.newInputStream(TEMPLATE, "test.txt")) {
+      Assertions.assertNotNull(stream);
+      Assertions.assertEquals("Hello", new String(stream.readAllBytes(), StandardCharsets.UTF_8));
+    }
   }
 
   @Test
@@ -143,8 +111,11 @@ public final class SFTPTemplateStorageTest {
       stream.write("World".getBytes(StandardCharsets.UTF_8));
     }
 
-    Assertions.assertTrue(Files.exists(TEMPLATE_PATH.resolve("test.txt")));
-    Assertions.assertEquals("HelloWorld", String.join("\n", Files.readAllLines(TEMPLATE_PATH.resolve("test.txt"))));
+    Assertions.assertTrue(storage.hasFile(TEMPLATE, "test.txt"));
+    try (var stream = storage.newInputStream(TEMPLATE, "test.txt")) {
+      Assertions.assertNotNull(stream);
+      Assertions.assertEquals("HelloWorld", new String(stream.readAllBytes(), StandardCharsets.UTF_8));
+    }
   }
 
   @Test
@@ -158,79 +129,57 @@ public final class SFTPTemplateStorageTest {
 
   @Test
   @Order(50)
-  void testCreateFile() {
-    Assertions.assertTrue(storage.createFile(TEMPLATE, "hello.txt"));
-    Assertions.assertTrue(Files.exists(TEMPLATE_PATH.resolve("hello.txt")));
-    Assertions.assertFalse(Files.isDirectory(TEMPLATE_PATH.resolve("hello.txt")));
+  void testFileGetFileInfo() {
+    var info = storage.fileInfo(TEMPLATE, "spigot.yml");
+    Assertions.assertNotNull(info);
+    Assertions.assertEquals(0, info.size());
+    Assertions.assertEquals("spigot.yml", info.path());
+    Assertions.assertEquals("spigot.yml", info.name());
   }
 
   @Test
   @Order(60)
-  void testHasFile() {
-    Assertions.assertTrue(storage.hasFile(TEMPLATE, "hello.txt"));
-    Assertions.assertFalse(storage.hasFile(TEMPLATE, "world.txt"));
+  void testDeleteFile() {
+    Assertions.assertTrue(storage.deleteFile(TEMPLATE, "spigot.yml"));
+    Assertions.assertFalse(storage.hasFile(TEMPLATE, "spigot.yml"));
   }
 
   @Test
   @Order(70)
-  void testFileGetFileInfo() {
-    var info = storage.fileInfo(TEMPLATE, "hello.txt");
-    Assertions.assertNotNull(info);
-    Assertions.assertEquals(0, info.size());
-    Assertions.assertEquals("hello.txt", info.path());
-    Assertions.assertEquals("hello.txt", info.name());
+  void testCreateDirectory() {
+    Assertions.assertTrue(storage.createDirectory(TEMPLATE, "hello"));
+    Assertions.assertTrue(storage.createFile(TEMPLATE, "hello/test.txt"));
+    Assertions.assertTrue(storage.hasFile(TEMPLATE, "hello/test.txt"));
   }
 
   @Test
   @Order(80)
-  void testDeleteFile() {
-    Assertions.assertTrue(storage.deleteFile(TEMPLATE, "hello.txt"));
-    Assertions.assertFalse(storage.hasFile(TEMPLATE, "hello.txt"));
-    Assertions.assertFalse(Files.exists(TEMPLATE_PATH.resolve("hello.txt")));
+  void testFileListingNonDeep() {
+    var files = storage.listFiles(TEMPLATE, "hello", false);
+    Assertions.assertNotNull(files);
+    Assertions.assertEquals(1, files.size());
+
+    var info = files.iterator().next();
+    Assertions.assertEquals(0, info.size());
+    Assertions.assertEquals("test.txt", info.name());
+    Assertions.assertTrue(info.path().endsWith("hello/test.txt"));
   }
 
   @Test
   @Order(90)
-  void testCreateDirectory() {
-    Assertions.assertTrue(storage.createDirectory(TEMPLATE, "hello"));
-    Assertions.assertTrue(Files.exists(TEMPLATE_PATH.resolve("hello")));
-    Assertions.assertTrue(Files.isDirectory(TEMPLATE_PATH.resolve("hello")));
-  }
-
-  @Test
-  @Order(100)
-  void testCreateFileInDirectory() {
-    Assertions.assertTrue(storage.createFile(TEMPLATE, "hello/test.txt"));
-    Assertions.assertTrue(Files.exists(TEMPLATE_PATH.resolve("hello").resolve("test.txt")));
-    Assertions.assertFalse(Files.isDirectory(TEMPLATE_PATH.resolve("hello").resolve("test.txt")));
-  }
-
-  @Test
-  @Order(110)
-  void testFileListingNonDeep() {
-    var files = storage.listFiles(TEMPLATE, "hello", false);
-    Assertions.assertNotNull(files);
-    Assertions.assertEquals(1, files.length);
-    Assertions.assertEquals(0, files[0].size());
-    Assertions.assertEquals("test.txt", files[0].name());
-    Assertions.assertEquals("/home/CloudNet/global/proxy/hello/test.txt", files[0].path());
-  }
-
-  @Test
-  @Order(120)
   void testFileListingDeep() {
     var files = storage.listFiles(TEMPLATE, "", true);
     Assertions.assertNotNull(files);
-    Assertions.assertEquals(3, files.length);
+    Assertions.assertEquals(3, files.size());
 
     // there must be one directory
-    var dir = Arrays.stream(files).filter(FileInfo::directory).findFirst().orElse(null);
+    var dir = files.stream().filter(FileInfo::directory).findFirst().orElse(null);
     Assertions.assertNotNull(dir);
     Assertions.assertEquals("hello", dir.name());
   }
 
   @Test
-  @Order(130)
+  @Order(100)
   void testTemplateListing() {
     var templates = storage.templates();
     Assertions.assertEquals(1, templates.size());
@@ -238,9 +187,10 @@ public final class SFTPTemplateStorageTest {
   }
 
   @Test
-  @Order(140)
-  void testTemplateDelete() throws IOException {
+  @Order(110)
+  void testTemplateDelete() {
     Assertions.assertTrue(storage.delete(TEMPLATE));
-    Assertions.assertEquals(0, Files.list(TEMPLATE_PATH).count());
+    Assertions.assertFalse(storage.contains(TEMPLATE));
+    Assertions.assertFalse(storage.hasFile(TEMPLATE, "test.txt"));
   }
 }
