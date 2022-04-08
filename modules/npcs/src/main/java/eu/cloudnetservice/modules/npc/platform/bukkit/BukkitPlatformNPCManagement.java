@@ -140,14 +140,9 @@ public class BukkitPlatformNPCManagement extends PlatformNPCManagement<Location,
   }
 
   @Override
-<<<<<<< HEAD
   public @NonNull WorldPosition toWorldPosition(@NonNull Location location, @NonNull World world,
     @NonNull String group) {
-    Verify.verifyNotNull(location.getWorld(), "world unloaded");
-=======
-  public @NonNull WorldPosition toWorldPosition(@NonNull Location location, @NonNull String group) {
     Preconditions.checkNotNull(location.getWorld(), "world unloaded");
->>>>>>> ea79537c945fa3d8adaa71f2c988c818c67e0356
     return new WorldPosition(
       location.getX(),
       location.getY(),
