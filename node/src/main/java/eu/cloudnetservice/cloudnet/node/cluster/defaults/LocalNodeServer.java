@@ -16,7 +16,7 @@
 
 package eu.cloudnetservice.cloudnet.node.cluster.defaults;
 
-import com.google.common.base.Verify;
+import com.google.common.base.Preconditions;
 import eu.cloudnetservice.cloudnet.common.document.gson.JsonDocument;
 import eu.cloudnetservice.cloudnet.driver.module.ModuleWrapper;
 import eu.cloudnetservice.cloudnet.driver.network.NetworkChannel;
@@ -25,7 +25,7 @@ import eu.cloudnetservice.cloudnet.driver.network.cluster.NetworkClusterNodeInfo
 import eu.cloudnetservice.cloudnet.driver.provider.CloudServiceFactory;
 import eu.cloudnetservice.cloudnet.driver.provider.SpecificCloudServiceProvider;
 import eu.cloudnetservice.cloudnet.driver.service.ProcessSnapshot;
-import eu.cloudnetservice.cloudnet.node.CloudNet;
+import eu.cloudnetservice.cloudnet.node.Node;
 import eu.cloudnetservice.cloudnet.node.cluster.NodeServer;
 import eu.cloudnetservice.cloudnet.node.cluster.NodeServerProvider;
 import eu.cloudnetservice.cloudnet.node.cluster.NodeServerState;
@@ -41,7 +41,7 @@ import org.jetbrains.annotations.UnknownNullability;
 
 public class LocalNodeServer implements NodeServer {
 
-  private final CloudNet node;
+  private final Node node;
   private final NodeServerProvider provider;
 
   private final long creationMillis = System.currentTimeMillis();
@@ -55,7 +55,7 @@ public class LocalNodeServer implements NodeServer {
   private volatile NetworkClusterNodeInfoSnapshot currentSnapshot;
   private volatile NetworkClusterNodeInfoSnapshot lastSnapshot;
 
-  public LocalNodeServer(@NonNull CloudNet node, @NonNull NodeServerProvider provider) {
+  public LocalNodeServer(@NonNull Node node, @NonNull NodeServerProvider provider) {
     this.node = node;
     this.provider = provider;
   }
@@ -117,7 +117,7 @@ public class LocalNodeServer implements NodeServer {
 
   @Override
   public void state(@NonNull NodeServerState state) {
-    Verify.verify(state == NodeServerState.READY, "Local node only accepts state changes to READY");
+    Preconditions.checkState(state == NodeServerState.READY, "Local node only accepts state changes to READY");
     // set the state
     this.state = state;
     this.lastStateChange = Instant.now();
@@ -150,7 +150,7 @@ public class LocalNodeServer implements NodeServer {
 
   @Override
   public void updateNodeInfoSnapshot(@Nullable NetworkClusterNodeInfoSnapshot snapshot) {
-    Verify.verifyNotNull(snapshot, "Local node cannot accept null snapshots");
+    Preconditions.checkNotNull(snapshot, "Local node cannot accept null snapshots");
     // pre-move the current snapshot to the last snapshot
     this.lastSnapshot = this.currentSnapshot;
     this.currentSnapshot = snapshot;

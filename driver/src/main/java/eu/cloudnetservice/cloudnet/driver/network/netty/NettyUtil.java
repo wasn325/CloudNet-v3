@@ -24,7 +24,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFactory;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
-import io.netty.util.ReferenceCounted;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import io.netty.util.internal.logging.JdkLoggerFactory;
@@ -49,7 +48,6 @@ public final class NettyUtil {
   private static final boolean NO_NATIVE_TRANSPORT = Boolean.getBoolean("cloudnet.no-native");
   private static final NettyTransport CURR_NETTY_TRANSPORT = NettyTransport.availableTransport(NO_NATIVE_TRANSPORT);
   // var int codec
-  private static final int[] VAR_INT_LENGTHS = new int[33];
   private static final SilentDecoderException INVALID_VAR_INT = new SilentDecoderException("Invalid var int");
   // packet thread handling
   private static final RejectedExecutionHandler DEFAULT_REJECT_HANDLER = new ThreadPoolExecutor.CallerRunsPolicy();
@@ -63,13 +61,6 @@ public final class NettyUtil {
     if (System.getProperty("io.netty.leakDetection.level") == null) {
       ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
     }
-
-    // initializes the length of each var int which removes the need for that later
-    for (int i = 0; i <= 32; ++i) {
-      VAR_INT_LENGTHS[i] = (int) Math.ceil(31D - (i - 1) / 7D);
-    }
-    // 0 is always one byte long
-    VAR_INT_LENGTHS[32] = 1;
   }
 
   private NettyUtil() {
@@ -138,24 +129,15 @@ public final class NettyUtil {
    * @throws NullPointerException if the given byte buf is null.
    */
   public static @NonNull ByteBuf writeVarInt(@NonNull ByteBuf byteBuf, int value) {
-    if ((value & -128) == 0) {
-      byteBuf.writeByte(value);
-    } else if ((value & -16384) == 0) {
-      var shortValue = (value & 0x7F | 0x80) << 8 | (value >>> 7);
-      byteBuf.writeShort(shortValue);
-    } else {
-      while (true) {
-        if ((value & -128) == 0) {
-          byteBuf.writeByte(value);
-          return byteBuf;
-        }
-
-        byteBuf.writeByte(value & 0x7F | 0x80);
+    while (true) {
+      if ((value & ~0x7F) == 0) {
+        byteBuf.writeByte(value);
+        return byteBuf;
+      } else {
+        byteBuf.writeByte((value & 0x7F) | 0x80);
         value >>>= 7;
       }
     }
-
-    return byteBuf;
   }
 
   /**
@@ -180,29 +162,6 @@ public final class NettyUtil {
   }
 
   /**
-   * Get the amount of bytes the given integer will consume when converted to a var int.
-   *
-   * @param varInt the var int to write.
-   * @return the number of bytes the given var int takes when serializing.
-   */
-  public static int varIntByteAmount(int varInt) {
-    return VAR_INT_LENGTHS[Integer.numberOfLeadingZeros(varInt)];
-  }
-
-  /**
-   * Releases the given link reference counted object with a pre-check if the reference count is still more than 0
-   * before releasing the message.
-   *
-   * @param counted the object to safe release.
-   * @throws NullPointerException if the given reference counted object is null.
-   */
-  public static void safeRelease(@NonNull ReferenceCounted counted) {
-    if (counted.refCnt() > 0) {
-      counted.release(counted.refCnt());
-    }
-  }
-
-  /**
    * Get the thread amount used by the packet dispatcher to dispatch incoming packets. This method returns always 4 when
    * running in as a wrapper and the amount of processors cores multiplied by 2 when running either embedded or as a
    * node.
@@ -211,7 +170,7 @@ public final class NettyUtil {
    */
   public static @Range(from = 2, to = Integer.MAX_VALUE) int threadAmount() {
     var environment = CloudNetDriver.instance().environment();
-    return environment == DriverEnvironment.CLOUDNET ? Math.max(8, Runtime.getRuntime().availableProcessors() * 2) : 4;
+    return environment == DriverEnvironment.NODE ? Math.max(8, Runtime.getRuntime().availableProcessors() * 2) : 4;
   }
 
   /**

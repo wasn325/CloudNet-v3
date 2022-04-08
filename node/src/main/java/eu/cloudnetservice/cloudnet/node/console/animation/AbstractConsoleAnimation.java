@@ -16,7 +16,7 @@
 
 package eu.cloudnetservice.cloudnet.node.console.animation;
 
-import com.google.common.base.Verify;
+import com.google.common.base.Preconditions;
 import eu.cloudnetservice.cloudnet.common.log.LogManager;
 import eu.cloudnetservice.cloudnet.common.log.Logger;
 import eu.cloudnetservice.cloudnet.node.console.Console;
@@ -55,17 +55,19 @@ public abstract class AbstractConsoleAnimation implements Runnable {
 
   protected void print(String @NonNull ... input) {
     if (input.length != 0) {
-      var ansi = Ansi.ansi().saveCursorPosition().cursorUp(this.cursorUp).eraseLine(Ansi.Erase.ALL);
-      for (var a : input) {
-        ansi.a(a);
-      }
+      this.console.writeRaw(() -> {
+        var ansi = Ansi.ansi().saveCursorPosition().cursorUp(this.cursorUp).eraseLine(Ansi.Erase.ALL);
+        for (var a : input) {
+          ansi.a(a);
+        }
 
-      this.console.forceWrite(ansi.restoreCursorPosition().toString());
+        return ansi.restoreCursorPosition().toString();
+      });
     }
   }
 
   protected void eraseLastLine() {
-    this.console.writeRaw(Ansi.ansi().reset().cursorUp(1).eraseLine().toString());
+    this.console.writeRaw(() -> Ansi.ansi().reset().cursorUp(1).eraseLine().toString());
   }
 
   /**
@@ -110,12 +112,12 @@ public abstract class AbstractConsoleAnimation implements Runnable {
   }
 
   public void console(@NonNull Console console) {
-    Verify.verify(this.console == null, "Cannot set console of animation twice");
+    Preconditions.checkState(this.console == null, "Cannot set console of animation twice");
     this.console = console;
   }
 
   public void resetConsole() {
-    Verify.verify(this.console != null, "Console is not set");
+    Preconditions.checkState(this.console != null, "Console is not set");
     this.console = null;
   }
 }

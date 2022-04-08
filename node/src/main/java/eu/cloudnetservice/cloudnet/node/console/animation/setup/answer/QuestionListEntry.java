@@ -16,21 +16,16 @@
 
 package eu.cloudnetservice.cloudnet.node.console.animation.setup.answer;
 
-import com.google.common.base.Verify;
+import com.google.common.base.Preconditions;
 import eu.cloudnetservice.cloudnet.common.language.I18n;
+import java.util.function.Supplier;
 import lombok.NonNull;
 
 public record QuestionListEntry<T>(
-  String key,
-  String question,
-  QuestionAnswerType<T> answerType
+  @NonNull String key,
+  @NonNull Supplier<String> question,
+  @NonNull QuestionAnswerType<T> answerType
 ) {
-
-  public QuestionListEntry(@NonNull String key, @NonNull String question, @NonNull QuestionAnswerType<T> answerType) {
-    this.key = key;
-    this.question = question;
-    this.answerType = answerType;
-  }
 
   public static @NonNull <T> Builder<T> builder() {
     return new Builder<>();
@@ -39,7 +34,7 @@ public record QuestionListEntry<T>(
   public static final class Builder<T> {
 
     private String key;
-    private String question;
+    private Supplier<String> question;
     private QuestionAnswerType<T> answerType;
 
     public @NonNull Builder<T> key(@NonNull String key) {
@@ -47,11 +42,11 @@ public record QuestionListEntry<T>(
       return this;
     }
 
-    public @NonNull Builder<T> translatedQuestion(@NonNull String questionTranslationKey) {
-      return this.question(I18n.trans(questionTranslationKey));
+    public @NonNull Builder<T> translatedQuestion(@NonNull String questionTranslationKey, @NonNull Object... args) {
+      return this.question(() -> I18n.trans(questionTranslationKey, args));
     }
 
-    public @NonNull Builder<T> question(@NonNull String question) {
+    public @NonNull Builder<T> question(@NonNull Supplier<String> question) {
       this.question = question;
       return this;
     }
@@ -66,9 +61,9 @@ public record QuestionListEntry<T>(
     }
 
     public @NonNull QuestionListEntry<T> build() {
-      Verify.verifyNotNull(this.key, "no key given");
-      Verify.verifyNotNull(this.question, "no question given");
-      Verify.verifyNotNull(this.answerType, "no answer type given");
+      Preconditions.checkNotNull(this.key, "no key given");
+      Preconditions.checkNotNull(this.question, "no question given");
+      Preconditions.checkNotNull(this.answerType, "no answer type given");
 
       return new QuestionListEntry<>(this.key, this.question, this.answerType);
     }

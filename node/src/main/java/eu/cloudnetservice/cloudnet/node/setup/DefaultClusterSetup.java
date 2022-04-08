@@ -16,7 +16,6 @@
 
 package eu.cloudnetservice.cloudnet.node.setup;
 
-import static eu.cloudnetservice.cloudnet.common.language.I18n.trans;
 import static eu.cloudnetservice.cloudnet.node.console.animation.setup.answer.Parsers.andThen;
 import static eu.cloudnetservice.cloudnet.node.console.animation.setup.answer.Parsers.bool;
 import static eu.cloudnetservice.cloudnet.node.console.animation.setup.answer.Parsers.nonEmptyStr;
@@ -27,7 +26,7 @@ import com.google.common.collect.Lists;
 import eu.cloudnetservice.cloudnet.driver.network.HostAndPort;
 import eu.cloudnetservice.cloudnet.driver.network.cluster.NetworkCluster;
 import eu.cloudnetservice.cloudnet.driver.network.cluster.NetworkClusterNode;
-import eu.cloudnetservice.cloudnet.node.CloudNet;
+import eu.cloudnetservice.cloudnet.node.Node;
 import eu.cloudnetservice.cloudnet.node.console.animation.setup.ConsoleSetupAnimation;
 import eu.cloudnetservice.cloudnet.node.console.animation.setup.answer.QuestionAnswerType;
 import eu.cloudnetservice.cloudnet.node.console.animation.setup.answer.QuestionListEntry;
@@ -81,7 +80,7 @@ public class DefaultClusterSetup implements DefaultSetup {
                     .addResultListener((___, nodes) -> animation.addEntriesFirst(nodes.stream()
                       .map(node -> QuestionListEntry.<HostAndPort>builder()
                         .key("nodeHost-" + node)
-                        .question(trans("cloudnet-init-setup-cluster-node-host", node))
+                        .translatedQuestion("cloudnet-init-setup-cluster-node-host", node)
                         .answerType(QuestionAnswerType.<HostAndPort>builder()
                           .parser(validatedHostAndPort(true))))
                       .map(Builder::build)
@@ -95,7 +94,7 @@ public class DefaultClusterSetup implements DefaultSetup {
   @Override
   public void handleResults(@NonNull ConsoleSetupAnimation animation) {
     if (animation.result("installCluster")) {
-      var config = CloudNet.instance().config();
+      var config = Node.instance().config();
 
       // apply the cluster settings
       Collection<String> nodeNames = animation.result("nodesList");

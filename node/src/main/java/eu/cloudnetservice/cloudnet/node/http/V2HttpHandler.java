@@ -27,9 +27,9 @@ import eu.cloudnetservice.cloudnet.driver.network.http.HttpResponse;
 import eu.cloudnetservice.cloudnet.driver.network.http.HttpResponseCode;
 import eu.cloudnetservice.cloudnet.driver.permission.Permission;
 import eu.cloudnetservice.cloudnet.driver.permission.PermissionUser;
-import eu.cloudnetservice.cloudnet.node.CloudNet;
-import eu.cloudnetservice.cloudnet.node.config.AccessControlConfiguration;
+import eu.cloudnetservice.cloudnet.node.Node;
 import eu.cloudnetservice.cloudnet.node.config.Configuration;
+import eu.cloudnetservice.cloudnet.node.config.RestConfiguration;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import lombok.NonNull;
@@ -45,21 +45,21 @@ public abstract class V2HttpHandler implements HttpHandler {
   protected final String requestMethodsString;
 
   protected final V2HttpAuthentication authentication;
-  protected final AccessControlConfiguration accessControlConfiguration;
+  protected final RestConfiguration restConfiguration;
 
   public V2HttpHandler(@Nullable String requiredPermission, @NonNull String... requestMethods) {
-    this(requiredPermission, DEFAULT_AUTH, CloudNet.instance().config().accessControlConfig(), requestMethods);
+    this(requiredPermission, DEFAULT_AUTH, Node.instance().config().restConfiguration(), requestMethods);
   }
 
   public V2HttpHandler(
     @Nullable String requiredPermission,
     @NonNull V2HttpAuthentication authentication,
-    @NonNull AccessControlConfiguration accessControlConfiguration,
+    @NonNull RestConfiguration restConfiguration,
     @NonNull String... requestMethods
   ) {
     this.requiredPermission = requiredPermission;
     this.authentication = authentication;
-    this.accessControlConfiguration = accessControlConfiguration;
+    this.restConfiguration = restConfiguration;
 
     this.requestMethods = Set.of(requestMethods);
     this.requestMethodsString = requestMethods.length == 0 ? "*" : String.join(", ", requestMethods);
@@ -87,7 +87,7 @@ public abstract class V2HttpHandler implements HttpHandler {
           }
           return;
         } else if (session.hasErrorMessage()) {
-          this.send403(context, session.errorMessage());
+          this.send401(context, session.errorMessage());
           return;
         }
         // try the basic auth method
@@ -100,11 +100,11 @@ public abstract class V2HttpHandler implements HttpHandler {
           }
           return;
         } else if (basic.hasErrorMessage()) {
-          this.send403(context, basic.errorMessage());
+          this.send401(context, basic.errorMessage());
           return;
         }
         // send an unauthorized response
-        this.send403(context, "No supported authentication method provided. Supported: Basic, Bearer");
+        this.send401(context, "No supported authentication method provided. Supported: Basic, Bearer");
       } else {
         // there was no authorization given, try without one
         this.handleUnauthorized(path, context);
@@ -113,7 +113,7 @@ public abstract class V2HttpHandler implements HttpHandler {
   }
 
   protected void handleUnauthorized(@NonNull String path, @NonNull HttpContext context) throws Exception {
-    this.send403(context, "Authentication required");
+    this.send401(context, "Authentication required");
   }
 
   protected void handleBasicAuthorized(
@@ -148,18 +148,25 @@ public abstract class V2HttpHandler implements HttpHandler {
       .cancelNext();
   }
 
+  protected void send401(@NonNull HttpContext context, @NonNull String reason) {
+    this.response(context, HttpResponseCode.UNAUTHORIZED)
+      .body(this.failure().append("reason", reason).toString().getBytes(StandardCharsets.UTF_8))
+      .context()
+      .closeAfter(true)
+      .cancelNext();
+  }
+
   protected void sendOptions(@NonNull HttpContext context) {
     context
       .cancelNext(true)
       .response()
       .status(HttpResponseCode.OK)
-      .header("Access-Control-Max-Age", Integer.toString(this.accessControlConfiguration.accessControlMaxAge()))
-      .header("Access-Control-Allow-Origin", this.accessControlConfiguration.corsPolicy())
-      .header("Access-Control-Allow-Headers", "*")
-      .header("Access-Control-Expose-Headers", "Accept, Origin, if-none-match, Access-Control-Allow-Headers, " +
-        "Access-Control-Allow-Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
       .header("Access-Control-Allow-Credentials", "true")
-      .header("Access-Control-Allow-Methods", this.requestMethodsString);
+      .header("Access-Control-Allow-Methods", this.requestMethodsString)
+      .header("Access-Control-Allow-Origin", this.restConfiguration.corsPolicy())
+      .header("Access-Control-Allow-Headers", this.restConfiguration.allowedHeaders())
+      .header("Access-Control-Expose-Headers", this.restConfiguration.exposedHeaders())
+      .header("Access-Control-Max-Age", Integer.toString(this.restConfiguration.accessControlMaxAge()));
   }
 
   protected @NonNull HttpResponse ok(@NonNull HttpContext context) {
@@ -178,7 +185,7 @@ public abstract class V2HttpHandler implements HttpHandler {
     return context.response()
       .status(statusCode)
       .header("Content-Type", "application/json")
-      .header("Access-Control-Allow-Origin", this.accessControlConfiguration.corsPolicy());
+      .header("Access-Control-Allow-Origin", this.restConfiguration.corsPolicy());
   }
 
   protected @NonNull JsonDocument body(@NonNull HttpRequest request) {
@@ -193,8 +200,8 @@ public abstract class V2HttpHandler implements HttpHandler {
     return JsonDocument.newDocument("success", false);
   }
 
-  protected @NonNull CloudNet node() {
-    return CloudNet.instance();
+  protected @NonNull Node node() {
+    return Node.instance();
   }
 
   protected @NonNull Configuration configuration() {

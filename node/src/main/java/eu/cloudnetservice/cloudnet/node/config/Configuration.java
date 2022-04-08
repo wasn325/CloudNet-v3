@@ -32,6 +32,12 @@ public interface Configuration {
 
   @NonNull Configuration save();
 
+  void reloadFrom(@NonNull Configuration configuration);
+
+  @NonNull String language();
+
+  void language(@NonNull String language);
+
   @NonNull String hostAddress();
 
   void hostAddress(@NonNull String hostAddress);
@@ -57,9 +63,9 @@ public interface Configuration {
 
   void httpListeners(@NonNull Collection<HostAndPort> httpListeners);
 
-  @NonNull AccessControlConfiguration accessControlConfig();
+  @NonNull RestConfiguration restConfiguration();
 
-  void accessControlConfig(@NonNull AccessControlConfiguration configuration);
+  void restConfiguration(@NonNull RestConfiguration configuration);
 
   @NonNull SSLConfiguration clientSSLConfig();
 

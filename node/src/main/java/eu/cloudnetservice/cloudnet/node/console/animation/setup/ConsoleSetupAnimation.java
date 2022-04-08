@@ -17,7 +17,7 @@
 package eu.cloudnetservice.cloudnet.node.console.animation.setup;
 
 import eu.cloudnetservice.cloudnet.common.language.I18n;
-import eu.cloudnetservice.cloudnet.node.CloudNet;
+import eu.cloudnetservice.cloudnet.node.Node;
 import eu.cloudnetservice.cloudnet.node.console.Console;
 import eu.cloudnetservice.cloudnet.node.console.animation.AbstractConsoleAnimation;
 import eu.cloudnetservice.cloudnet.node.console.animation.setup.answer.QuestionAnswerType;
@@ -132,7 +132,7 @@ public class ConsoleSetupAnimation extends AbstractConsoleAnimation {
     this.previousHistory = console.commandHistory();
     this.previousPrintingEnabled = console.printingEnabled();
     this.previousUseMatchingHistorySearch = console.usingMatchingHistoryComplete();
-    this.previousConsoleLines = CloudNet.instance().logHandler().formattedCachedLogLines();
+    this.previousConsoleLines = Node.instance().logHandler().formattedCachedLogLines();
 
     // apply the console settings of the animation
     console.clearScreen();
@@ -157,7 +157,7 @@ public class ConsoleSetupAnimation extends AbstractConsoleAnimation {
 
     // disable all commands of the console
     console.disableAllHandlers();
-    CloudNet.instance().eventManager().callEvent(new SetupInitiateEvent(this));
+    Node.instance().eventManager().callEvent(new SetupInitiateEvent(this));
   }
 
   @Override
@@ -188,14 +188,14 @@ public class ConsoleSetupAnimation extends AbstractConsoleAnimation {
       var answers = I18n.trans("ca-question-list-possible-answers-list",
         String.join(", ", answerType.possibleAnswers()));
       // write the answers to the console
-      for (var line : this.updateCursor("&r" + entry.question() + " &r> &e" + answers)) {
+      for (var line : this.updateCursor("&r" + entry.question().get() + " &r> &e" + answers)) {
         super.console().forceWriteLine(line);
       }
     } else {
       // clear the history
       this.console.commandHistory(null);
       // just write the question into the console
-      for (var line : this.updateCursor("&r" + entry.question())) {
+      for (var line : this.updateCursor("&r" + entry.question().get())) {
         super.console().forceWriteLine(line);
       }
     }
@@ -250,11 +250,11 @@ public class ConsoleSetupAnimation extends AbstractConsoleAnimation {
       answerType.postResult(result);
       this.results.put(entry.key(), result);
       // call the event
-      CloudNet.instance().eventManager().callEvent(new SetupResponseEvent(this, entry, result));
+      Node.instance().eventManager().callEvent(new SetupResponseEvent(this, entry, result));
       // re-draw the question line, add the given response to it
-      this.console.writeRaw(this.eraseLines(Ansi.ansi().reset(), this.currentCursor + 1)
+      this.console.writeRaw(() -> this.eraseLines(Ansi.ansi().reset(), this.currentCursor + 1)
         .a("&r") // reset of the colors
-        .a(entry.question()) // the question
+        .a(entry.question().get()) // the question
         .a(" &r=> &a") // separator between the question and the answer
         .a(input) // the given result
         .a(System.lineSeparator()) // jump to next line
@@ -272,7 +272,7 @@ public class ConsoleSetupAnimation extends AbstractConsoleAnimation {
       // wait a short period of time for the user to read
       Thread.sleep(1500);
       // erase the invalid lines again
-      this.console().writeRaw(this.eraseLines(Ansi.ansi().reset(), messageLines.length).toString());
+      this.console().writeRaw(() -> this.eraseLines(Ansi.ansi().reset(), messageLines.length).toString());
       // reset the console history
       this.console().commandHistory(answerType.possibleAnswers());
       // continue with the current question
@@ -284,7 +284,7 @@ public class ConsoleSetupAnimation extends AbstractConsoleAnimation {
   public void resetConsole() {
     if (this.cancelled) {
       super.console().forceWriteLine("&c" + I18n.trans("ca-question-list-cancelled"));
-      CloudNet.instance().eventManager().callEvent(new SetupCancelledEvent(this));
+      Node.instance().eventManager().callEvent(new SetupCancelledEvent(this));
       // reset the cancelled state
       this.cancelled = false;
     } else {
@@ -293,7 +293,7 @@ public class ConsoleSetupAnimation extends AbstractConsoleAnimation {
         super.console().forceWriteLine("&r" + this.footer);
       }
 
-      CloudNet.instance().eventManager().callEvent(new SetupCompleteEvent(this));
+      Node.instance().eventManager().callEvent(new SetupCompleteEvent(this));
     }
 
     try {
