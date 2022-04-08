@@ -21,11 +21,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.net.InetAddresses;
 import eu.cloudnetservice.cloudnet.common.io.FileUtil;
+import eu.cloudnetservice.cloudnet.common.language.I18n;
 import eu.cloudnetservice.cloudnet.driver.module.DefaultModuleProvider;
 import eu.cloudnetservice.cloudnet.driver.network.HostAndPort;
 import eu.cloudnetservice.cloudnet.driver.network.cluster.NetworkClusterNode;
 import eu.cloudnetservice.cloudnet.driver.service.ProcessSnapshot;
-import eu.cloudnetservice.cloudnet.node.CloudNet;
+import eu.cloudnetservice.cloudnet.node.Node;
 import eu.cloudnetservice.cloudnet.node.console.animation.setup.ConsoleSetupAnimation;
 import eu.cloudnetservice.cloudnet.node.console.animation.setup.answer.Parsers;
 import eu.cloudnetservice.cloudnet.node.console.animation.setup.answer.Parsers.ParserException;
@@ -57,6 +58,22 @@ public class DefaultConfigSetup extends DefaultClusterSetup {
     Collection<String> addresses = NetworkUtil.availableIPAddresses();
     // apply the questions
     animation.addEntries(
+      // language
+      QuestionListEntry.<String>builder()
+        .key("language")
+        .question(() -> "Welcome to the CloudNet Setup! Please choose the language you want to use")
+        .answerType(QuestionAnswerType.<String>builder()
+          .recommendation(I18n.language())
+          .possibleResults(I18n.knownLanguages())
+          .parser(input -> {
+            if (I18n.knownLanguages().contains(input)) {
+              return input;
+            } else {
+              throw ParserException.INSTANCE;
+            }
+          })
+          .addResultListener((__, language) -> I18n.language(language)))
+        .build(),
       // eula agreement
       QuestionListEntry.<Boolean>builder()
         .key("eula")
@@ -124,14 +141,14 @@ public class DefaultConfigSetup extends DefaultClusterSetup {
             Set<ModuleEntry> result = new HashSet<>();
             for (var entry : entries) {
               // get the associated entry
-              var moduleEntry = CloudNet.instance().modulesHolder()
+              var moduleEntry = Node.instance().modulesHolder()
                 .findByName(entry)
                 .orElseThrow(() -> ParserException.INSTANCE);
               // check for depending on modules
               if (!moduleEntry.dependingModules().isEmpty()) {
                 moduleEntry.dependingModules().forEach(module -> {
                   // resolve and add the depending on module
-                  var dependEntry = CloudNet.instance().modulesHolder()
+                  var dependEntry = Node.instance().modulesHolder()
                     .findByName(module)
                     .orElseThrow(() -> ParserException.INSTANCE);
                   result.add(dependEntry);
@@ -142,7 +159,7 @@ public class DefaultConfigSetup extends DefaultClusterSetup {
             }
             return result;
           })
-          .possibleResults(CloudNet.instance().modulesHolder().entries().stream()
+          .possibleResults(Node.instance().modulesHolder().entries().stream()
             .map(ModuleEntry::name)
             .toList())
           .recommendation("CloudNet-Bridge CloudNet-Signs")
@@ -156,13 +173,13 @@ public class DefaultConfigSetup extends DefaultClusterSetup {
               Unirest.get(entry.url()).asFile(targetPath.toString(), StandardCopyOption.REPLACE_EXISTING);
               // validate the downloaded file
               var checksum = ChecksumUtil.fileShaSum(targetPath);
-              if (!checksum.equals(entry.sha3256()) && !CloudNet.instance().dev() && !entry.official()) {
+              if (!checksum.equals(entry.sha3256()) && !Node.instance().dev() && !entry.official()) {
                 // remove the file
                 FileUtil.delete(targetPath);
                 return;
               }
               // load the module
-              CloudNet.instance().moduleProvider().loadModule(targetPath);
+              Node.instance().moduleProvider().loadModule(targetPath);
             });
           }))
         .build()
@@ -173,7 +190,10 @@ public class DefaultConfigSetup extends DefaultClusterSetup {
 
   @Override
   public void handleResults(@NonNull ConsoleSetupAnimation animation) {
-    var config = CloudNet.instance().config();
+    var config = Node.instance().config();
+    // language
+    config.language(animation.result("language"));
+
     // init the local node identity
     HostAndPort host = animation.result("internalHost");
     config.identity(new NetworkClusterNode(

@@ -20,7 +20,7 @@ import eu.cloudnetservice.cloudnet.driver.module.ModuleLifeCycle;
 import eu.cloudnetservice.cloudnet.driver.module.ModuleTask;
 import eu.cloudnetservice.cloudnet.driver.module.driver.DriverModule;
 import eu.cloudnetservice.cloudnet.driver.service.ServiceTask;
-import eu.cloudnetservice.cloudnet.node.CloudNet;
+import eu.cloudnetservice.cloudnet.node.Node;
 import eu.cloudnetservice.modules.smart.SmartServiceTaskConfig.TemplateInstaller;
 import eu.cloudnetservice.modules.smart.listener.CloudNetLocalServiceListener;
 import eu.cloudnetservice.modules.smart.listener.CloudNetLocalServiceTaskListener;
@@ -72,17 +72,19 @@ public class CloudNetSmartModule extends DriverModule {
       if (!task.properties().contains("smartConfig")) {
         task.properties().append("smartConfig", SmartServiceTaskConfig.builder().build());
         // update the task
-        CloudNet.instance().serviceTaskProvider().addServiceTask(task);
+        Node.instance().serviceTaskProvider().addServiceTask(task);
       }
     }
   }
 
   @ModuleTask(event = ModuleLifeCycle.STARTED)
-  public void registerListeners() {
+  public void start() {
     this.registerListener(
       new CloudNetTickListener(this),
       new CloudNetLocalServiceTaskListener(),
       new CloudNetLocalServiceListener(this));
+
+    Node.instance().commandProvider().register(new CommandSmart());
   }
 
   public @Nullable SmartServiceTaskConfig smartConfig(@NonNull ServiceTask task) {

@@ -29,7 +29,7 @@ import eu.cloudnetservice.cloudnet.common.language.I18n;
 import eu.cloudnetservice.cloudnet.driver.service.ServiceEnvironmentType;
 import eu.cloudnetservice.cloudnet.driver.service.ServiceTemplate;
 import eu.cloudnetservice.cloudnet.driver.template.TemplateStorage;
-import eu.cloudnetservice.cloudnet.node.CloudNet;
+import eu.cloudnetservice.cloudnet.node.Node;
 import eu.cloudnetservice.cloudnet.node.command.annotation.CommandAlias;
 import eu.cloudnetservice.cloudnet.node.command.annotation.Description;
 import eu.cloudnetservice.cloudnet.node.command.exception.ArgumentNotAvailableException;
@@ -70,7 +70,7 @@ public final class CommandTemplate {
 
   @Suggestions("serviceTemplate")
   public @NonNull List<String> suggestServiceTemplate(@NonNull CommandContext<?> $, @NonNull String input) {
-    return CloudNet.instance().localTemplateStorage().templates()
+    return Node.instance().templateStorageProvider().localTemplateStorage().templates()
       .stream()
       .map(ServiceTemplate::toString)
       .toList();
@@ -82,7 +82,7 @@ public final class CommandTemplate {
     @NonNull Queue<String> input
   ) {
     var storage = input.remove();
-    var templateStorage = CloudNet.instance().templateStorage(storage);
+    var templateStorage = Node.instance().templateStorageProvider().templateStorage(storage);
     if (templateStorage == null) {
       throw new ArgumentNotAvailableException(I18n.trans("command-template-storage-not-found", storage));
     }
@@ -92,10 +92,7 @@ public final class CommandTemplate {
 
   @Suggestions("templateStorage")
   public @NonNull List<String> suggestTemplateStorage(@NonNull CommandContext<?> $, @NonNull String input) {
-    return CloudNet.instance().availableTemplateStorages()
-      .stream()
-      .map(Nameable::name)
-      .toList();
+    return List.copyOf(Node.instance().templateStorageProvider().availableTemplateStorages());
   }
 
   @Parser(suggestions = "version")
@@ -126,14 +123,14 @@ public final class CommandTemplate {
     @NonNull Queue<String> input
   ) {
     var env = input.remove();
-    return CloudNet.instance().serviceVersionProvider().getEnvironmentType(env)
+    return Node.instance().serviceVersionProvider().getEnvironmentType(env)
       .orElseThrow(() ->
         new ArgumentNotAvailableException(I18n.trans("command-template-environment-not-found", env)));
   }
 
   @Suggestions("serviceEnvironments")
   public @NonNull List<String> suggestServiceEnvironments(@NonNull CommandContext<?> context, @NonNull String input) {
-    return List.copyOf(CloudNet.instance().serviceVersionProvider().knownEnvironments().keySet());
+    return List.copyOf(Node.instance().serviceVersionProvider().knownEnvironments().keySet());
   }
 
   @CommandMethod("template|t list [storage]")
@@ -144,7 +141,7 @@ public final class CommandTemplate {
     Collection<ServiceTemplate> templates;
     // get all templates if no specific template is given
     if (templateStorage == null) {
-      templates = CloudNet.instance().serviceRegistry().providers(TemplateStorage.class).stream()
+      templates = Node.instance().serviceRegistry().providers(TemplateStorage.class).stream()
         .flatMap(storage -> storage.templates().stream())
         .toList();
     } else {
@@ -203,7 +200,7 @@ public final class CommandTemplate {
     var sourceStorage = sourceTemplate.storage();
     var targetStorage = targetTemplate.storage();
 
-    CloudNet.instance().mainThread().runTask(() -> {
+    Node.instance().mainThread().runTask(() -> {
       source.sendMessage(I18n.trans("command-template-copy", sourceTemplate, targetTemplate));
 
       targetStorage.delete(targetTemplate);

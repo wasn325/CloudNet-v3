@@ -16,15 +16,15 @@
 
 package eu.cloudnetservice.modules.bridge.config;
 
-import com.google.common.base.Verify;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import eu.cloudnetservice.cloudnet.common.document.gson.JsonDocument;
 import eu.cloudnetservice.cloudnet.common.document.property.JsonDocPropertyHolder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import lombok.EqualsAndHashCode;
@@ -55,8 +55,6 @@ public final class BridgeConfiguration extends JsonDocPropertyHolder {
   private final String prefix;
   private final Map<String, Map<String, String>> localizedMessages;
 
-  private final boolean logPlayerConnections;
-
   private final Collection<String> excludedGroups;
   private final Collection<String> hubCommandNames;
   private final Collection<ProxyFallbackConfiguration> fallbackConfigurations;
@@ -65,19 +63,17 @@ public final class BridgeConfiguration extends JsonDocPropertyHolder {
     super(JsonDocument.newDocument());
     this.prefix = "§7Cloud §8| §b";
     this.localizedMessages = new HashMap<>(DEFAULT_MESSAGES);
-    this.logPlayerConnections = true;
     this.excludedGroups = new ArrayList<>();
     this.hubCommandNames = Arrays.asList("hub", "lobby", "leave", "l");
-    this.fallbackConfigurations = new ArrayList<>(Collections.singleton(new ProxyFallbackConfiguration(
-      "Proxy",
-      "Lobby",
-      new ArrayList<>())));
+    this.fallbackConfigurations = new ArrayList<>(List.of(ProxyFallbackConfiguration.builder()
+      .targetGroup("Proxy")
+      .defaultFallbackTask("Lobby")
+      .build()));
   }
 
   public BridgeConfiguration(
     @NonNull String prefix,
     @NonNull Map<String, Map<String, String>> localizedMessages,
-    boolean logPlayerConnections,
     @NonNull Collection<String> excludedGroups,
     @NonNull Collection<String> hubCommandNames,
     @NonNull Collection<ProxyFallbackConfiguration> fallbackConfigurations,
@@ -86,7 +82,6 @@ public final class BridgeConfiguration extends JsonDocPropertyHolder {
     super(properties);
     this.prefix = prefix;
     this.localizedMessages = localizedMessages;
-    this.logPlayerConnections = logPlayerConnections;
     this.excludedGroups = excludedGroups;
     this.hubCommandNames = hubCommandNames;
     this.fallbackConfigurations = fallbackConfigurations;
@@ -117,7 +112,7 @@ public final class BridgeConfiguration extends JsonDocPropertyHolder {
     var messages = this.localizedMessages.get(locale == null ? "default" : locale.getLanguage());
     if (messages == null) {
       // get the default locale (they have to be present)
-      messages = Verify.verifyNotNull(this.localizedMessages.get("default"));
+      messages = Preconditions.checkNotNull(this.localizedMessages.get("default"));
     }
     // get the message from the map
     return String.format("%s%s", withPrefix ? this.prefix : "", messages.get(key));

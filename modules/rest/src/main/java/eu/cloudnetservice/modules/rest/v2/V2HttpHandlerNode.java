@@ -26,7 +26,7 @@ import eu.cloudnetservice.cloudnet.driver.network.http.websocket.WebSocketChanne
 import eu.cloudnetservice.cloudnet.driver.network.http.websocket.WebSocketFrameType;
 import eu.cloudnetservice.cloudnet.driver.network.http.websocket.WebSocketListener;
 import eu.cloudnetservice.cloudnet.driver.permission.PermissionUser;
-import eu.cloudnetservice.cloudnet.node.CloudNet;
+import eu.cloudnetservice.cloudnet.node.Node;
 import eu.cloudnetservice.cloudnet.node.config.JsonConfiguration;
 import eu.cloudnetservice.cloudnet.node.http.HttpSession;
 import eu.cloudnetservice.cloudnet.node.http.WebSocketAbleV2HttpHandler;
@@ -88,7 +88,7 @@ public class V2HttpHandlerNode extends WebSocketAbleV2HttpHandler {
     var nodeServer = this.node().nodeServerProvider().localNode();
 
     var information = this.success()
-      .append("version", CloudNet.instance().version())
+      .append("version", Node.instance().version())
       .append("nodeInfoSnapshot", nodeServer.nodeInfoSnapshot())
       .append("lastNodeInfoSnapshot", nodeServer.lastNodeInfoSnapshot())
       .append("serviceCount", this.node().cloudServiceProvider().serviceCount())
@@ -154,17 +154,15 @@ public class V2HttpHandlerNode extends WebSocketAbleV2HttpHandler {
   }
 
   protected void handleLiveConsoleRequest(HttpContext context, HttpSession session) {
-    var channel = context.upgrade();
-    if (channel != null) {
+    context.upgrade().thenAccept(channel -> {
       var handler = new WebSocketLogHandler(session, channel, DefaultLogFormatter.END_LINE_SEPARATOR);
-
       channel.addListener(handler);
       LogManager.rootLogger().addHandler(handler);
-    }
+    });
   }
 
   protected void reloadConfig() {
-    this.node().config(this.node().config().load());
+    this.node().reloadConfigFrom(JsonConfiguration.loadFromFile(this.node()));
     this.node().serviceTaskProvider().reload();
     this.node().groupConfigurationProvider().reload();
     this.node().permissionManagement().reload();

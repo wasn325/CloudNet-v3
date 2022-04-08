@@ -1,7 +1,7 @@
 {
   "openapi" : "3.0.3",
   "info" : {
-    "description" : "CloudNet's rest API version 2 is the next generation in CloudNet's rest history. It has\ndefinitely more opportunities than the previous version of it and provides\na lot of methods to manage and control the CloudNet node and cluster behaviour.\n\nThe API is based on http/https requests and mostely JSON responses. You need\nto send your session bearer token when you make a request. The token can be\nobtained by sending a request to the /auth route. Most of the routes require\nan authentication and a permission which must be set to access the endpoint.\n\nAll the responses contain a `success` boolean (if they are JSON responses) giving\ninformation whether or not the request was handled successfully. If that boolean is\n`false` an extra `reason` field is appended to the JSON entity defining the cause\nof the failure.\n\nEvery rest rout is fixed to a version number and every call must contain one.\nThe latest one is 2. The latest stable endpoint base URL is\n`http(s)://{host}:{port}/api/v2/`. Host and port is the one defined in your\nCloudNet's node config.json `httpListeners` section. If you want to use https\nyou have to configure the web SSL settings in the same file.\n",
+    "description" : "CloudNet's rest API version 2 is the next generation in CloudNet's rest history. It has\ndefinitely more opportunities than the previous version of it and provides\na lot of methods to manage and control the CloudNet node and cluster behaviour.\n\nThe API is based on http/https requests and mostly JSON responses. You need\nto send your session bearer token when you make a request. The token can be\nobtained by sending a request to the /auth route. Most of the routes require\nan authentication and a permission which must be set to access the endpoint.\n\nAll the responses contain a `success` boolean (if they are JSON responses) giving\ninformation whether or not the request was handled successfully. If that boolean is\n`false` an extra `reason` field is appended to the JSON entity defining the cause\nof the failure.\n\nEvery rest rout is fixed to a version number and every call must contain one.\nThe latest one is 2. The latest stable endpoint base URL is\n`http(s)://{host}:{port}/api/v2/`. Host and port is the one defined in your\nCloudNet's node config.json `httpListeners` section. If you want to use https\nyou have to configure the web SSL settings in the same file.\n",
     "version" : "2",
     "title" : "CloudNet v3",
     "contact" : {
@@ -120,8 +120,11 @@
               }
             }
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       },
@@ -148,8 +151,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           },
           "404" : {
             "$ref" : "#/components/responses/NotFound"
@@ -179,8 +185,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -217,8 +226,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           },
           "404" : {
             "$ref" : "#/components/responses/NotFound"
@@ -237,8 +249,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           },
           "404" : {
             "$ref" : "#/components/responses/NotFound"
@@ -304,8 +319,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -344,8 +362,11 @@
         "summary" : "Live console",
         "description" : "Upgrades the connection to a web socket connection and sends all new command\nlines received to the connection.\n",
         "responses" : {
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -372,8 +393,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -392,14 +416,17 @@
                   "allOf" : [ {
                     "$ref" : "#/components/schemas/Success"
                   }, {
-                    "$ref" : "#/components/schemas/JsonConfiguration"
+                    "$ref" : "#/components/schemas/NodeConfiguration"
                   } ]
                 }
               }
             }
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       },
@@ -408,7 +435,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/JsonConfiguration"
+                "$ref" : "#/components/schemas/NodeConfiguration"
               }
             }
           }
@@ -423,8 +450,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -458,8 +488,11 @@
               }
             }
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -506,8 +539,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       },
@@ -544,8 +580,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       },
@@ -568,8 +607,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -594,8 +636,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -640,8 +685,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -683,8 +731,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -734,8 +785,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -813,8 +867,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -841,8 +898,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       },
@@ -871,8 +931,11 @@
               }
             }
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -912,8 +975,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       },
@@ -927,8 +993,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -969,8 +1038,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -997,8 +1069,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       },
@@ -1027,8 +1102,11 @@
               }
             }
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1068,8 +1146,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       },
@@ -1083,8 +1164,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1125,8 +1209,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1153,8 +1240,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1195,8 +1285,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       },
@@ -1210,8 +1303,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1253,8 +1349,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1281,8 +1380,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1314,8 +1416,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1347,8 +1452,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1389,8 +1497,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       },
@@ -1404,8 +1515,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1447,8 +1561,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1470,7 +1587,7 @@
         "summary" : "Creates a task",
         "responses" : {
           "200" : {
-            "description" : "The request was ok but the task couln't be created",
+            "description" : "The request was ok but the task couldn't be created",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -1498,8 +1615,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       },
@@ -1531,8 +1651,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1572,8 +1695,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       },
@@ -1594,8 +1720,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1636,8 +1765,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1661,8 +1793,11 @@
               }
             }
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1696,8 +1831,11 @@
               }
             }
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1711,8 +1849,11 @@
           "200" : {
             "$ref" : "#/components/responses/Success"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1721,7 +1862,7 @@
       "post" : {
         "tags" : [ "Session Management" ],
         "summary" : "Refreshes a session",
-        "description" : "Refresehes the session of a user by adding another hour (by default) of\nsession time to it. The reponse will contain a need token when the session\nwas refreshed successfully.\n",
+        "description" : "Refreshes the session of a user by adding another hour (by default) of\nsession time to it. The response will contain a need token when the session\nwas refreshed successfully.\n",
         "responses" : {
           "200" : {
             "description" : "OK",
@@ -1733,8 +1874,11 @@
               }
             }
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1765,8 +1909,11 @@
               }
             }
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1806,8 +1953,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       },
@@ -1821,8 +1971,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1856,8 +2009,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1891,8 +2047,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1926,8 +2085,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1971,8 +2133,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -1995,8 +2160,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -2069,8 +2237,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -2146,8 +2317,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -2189,8 +2363,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -2222,8 +2399,11 @@
               }
             }
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -2266,8 +2446,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -2328,8 +2511,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           },
           "404" : {
             "description" : "The path requested doesn't exist in the template or is a directory\n",
@@ -2399,8 +2585,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           },
           "404" : {
             "description" : "The path requested doesn't exist in the template",
@@ -2447,7 +2636,7 @@
           "required" : true
         } ],
         "tags" : [ "Templates" ],
-        "summary" : "Checks wheather a file/directory exists at the specified path",
+        "summary" : "Checks whether a file/directory exists at the specified path",
         "responses" : {
           "200" : {
             "description" : "OK",
@@ -2471,8 +2660,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -2526,8 +2718,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           },
           "404" : {
             "description" : "Not found",
@@ -2609,8 +2804,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -2648,8 +2846,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -2726,8 +2927,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -2776,8 +2980,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -2833,8 +3040,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           },
           "404" : {
             "description" : "File not found",
@@ -2900,8 +3110,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           },
           "404" : {
             "description" : "File not found",
@@ -2956,8 +3169,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -2995,8 +3211,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -3041,8 +3260,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -3087,8 +3309,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -3119,8 +3344,11 @@
               }
             }
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -3159,8 +3387,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -3185,8 +3416,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -3213,8 +3447,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -3245,8 +3482,11 @@
               }
             }
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -3259,8 +3499,11 @@
           "200" : {
             "$ref" : "#/components/responses/Success"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -3295,8 +3538,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -3320,8 +3566,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -3345,8 +3594,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -3385,8 +3637,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       },
@@ -3418,6 +3673,9 @@
           },
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Forbidden"
           },
           "403" : {
             "$ref" : "#/components/responses/Unauthorized"
@@ -3466,8 +3724,11 @@
           "400" : {
             "$ref" : "#/components/responses/BadRequest"
           },
-          "403" : {
+          "401" : {
             "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
           }
         }
       }
@@ -3527,7 +3788,17 @@
         }
       },
       "Unauthorized" : {
-        "description" : "Either the credentials for a successful login are missing or the user\nhas not the required permissions to execute that action\n",
+        "description" : "The the credentials for a successful login are missing",
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Forbidden" : {
+        "description" : "The user has not the required permissions to execute that action\n",
         "content" : {
           "application/json" : {
             "schema" : {
@@ -3537,7 +3808,7 @@
         }
       },
       "BadRequest" : {
-        "description" : "The request sent to the server does not contain all nessacary information\nor a specific information provided is invalid.\n",
+        "description" : "The request sent to the server does not contain all necessary information\nor a specific information provided is invalid.\n",
         "content" : {
           "application/json" : {
             "schema" : {
@@ -3567,7 +3838,7 @@
           }
         } ]
       },
-      "JsonConfiguration" : {
+      "NodeConfiguration" : {
         "type" : "object",
         "allOf" : [ {
           "$ref" : "#/components/schemas/JsonDocPropertyable"
@@ -3897,7 +4168,7 @@
             },
             "prefix" : {
               "type" : "string",
-              "example" : "&7Spieler"
+              "example" : "&7Player"
             },
             "suffix" : {
               "type" : "string",
@@ -3905,7 +4176,7 @@
             },
             "display" : {
               "type" : "string",
-              "example" : "&7Spieler"
+              "example" : "&7Player"
             },
             "sortId" : {
               "type" : "integer",
@@ -3983,7 +4254,7 @@
           "properties" : {
             "name" : {
               "type" : "string",
-              "example" : "Spieler"
+              "example" : "Player"
             },
             "potency" : {
               "type" : "integer",
@@ -4742,12 +5013,12 @@
           "success" : {
             "type" : "boolean",
             "default" : false,
-            "description" : "This boolean will always be false when an error occured"
+            "description" : "This boolean will always be false when an error occurred"
           },
           "reason" : {
             "type" : "string",
             "example" : "Error message",
-            "description" : "The error that occured during the processing of the request"
+            "description" : "The error that occurred during the processing of the request"
           }
         }
       }

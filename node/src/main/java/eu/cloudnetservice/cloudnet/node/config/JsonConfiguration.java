@@ -25,7 +25,7 @@ import eu.cloudnetservice.cloudnet.driver.network.cluster.NetworkCluster;
 import eu.cloudnetservice.cloudnet.driver.network.cluster.NetworkClusterNode;
 import eu.cloudnetservice.cloudnet.driver.network.ssl.SSLConfiguration;
 import eu.cloudnetservice.cloudnet.driver.service.ProcessSnapshot;
-import eu.cloudnetservice.cloudnet.node.CloudNet;
+import eu.cloudnetservice.cloudnet.node.Node;
 import eu.cloudnetservice.cloudnet.node.setup.DefaultConfigSetup;
 import eu.cloudnetservice.cloudnet.node.util.NetworkUtil;
 import java.nio.file.Files;
@@ -58,6 +58,8 @@ public final class JsonConfiguration implements Configuration {
     return null;
   };
 
+  private String language;
+
   private NetworkClusterNode identity;
   private NetworkCluster clusterConfig;
 
@@ -77,8 +79,8 @@ public final class JsonConfiguration implements Configuration {
   private String hostAddress;
   private String connectHostAddress;
 
+  private RestConfiguration restConfiguration;
   private Collection<HostAndPort> httpListeners;
-  private AccessControlConfiguration accessControlConfiguration;
 
   private SSLConfiguration clientSslConfig;
   private SSLConfiguration serverSslConfig;
@@ -100,7 +102,7 @@ public final class JsonConfiguration implements Configuration {
     }
   }
 
-  public static @NonNull Configuration loadFromFile(@NonNull CloudNet nodeInstance) {
+  public static @NonNull Configuration loadFromFile(@NonNull Node nodeInstance) {
     if (Files.notExists(CONFIG_FILE_PATH)) {
       // register the setup if the file does not exists
       nodeInstance.installation().registerSetup(new DefaultConfigSetup());
@@ -117,6 +119,12 @@ public final class JsonConfiguration implements Configuration {
 
   @Override
   public @NonNull Configuration load() {
+    if (this.language == null) {
+      this.language = ConfigurationUtil.get(
+        "cloudnet.config.language",
+        "en_US");
+    }
+
     if (this.identity == null) {
       this.identity = new NetworkClusterNode(
         ConfigurationUtil.get(
@@ -224,14 +232,14 @@ public final class JsonConfiguration implements Configuration {
         ConfigurationUtil.HOST_AND_PORT_PARSER);
     }
 
-    if (this.accessControlConfiguration == null) {
-      this.accessControlConfiguration = ConfigurationUtil.get(
+    if (this.restConfiguration == null) {
+      this.restConfiguration = ConfigurationUtil.get(
         "cloudnet.config.accessControlConfiguration",
-        new AccessControlConfiguration("*", 3600),
+        new RestConfiguration("*", "*", "Content-Encoding", 3600),
         value -> {
           var parts = value.split(";");
-          if (parts.length == 2) {
-            return new AccessControlConfiguration(parts[0], Integer.parseInt(parts[1]));
+          if (parts.length == 4) {
+            return new RestConfiguration(parts[0], parts[1], parts[2], Integer.parseInt(parts[3]));
           }
           // unable to parse
           return null;
@@ -288,6 +296,49 @@ public final class JsonConfiguration implements Configuration {
   public @NonNull Configuration save() {
     JsonDocument.newDocument(this).write(CONFIG_FILE_PATH);
     return this;
+  }
+
+  @Override
+  public void reloadFrom(@NonNull Configuration configuration) {
+    // supported identity changes
+    this.identity.properties().append(configuration.identity().properties());
+
+    // collection configurations
+    this.identity.listeners().clear();
+    this.identity.listeners().addAll(configuration.identity().listeners());
+
+    this.ipWhitelist.clear();
+    this.ipWhitelist.addAll(configuration.ipWhitelist());
+
+    this.clusterConfig.nodes().clear();
+    this.clusterConfig.nodes().addAll(configuration.clusterConfig().nodes());
+
+    // general configuration
+    this.maxMemory = configuration.maxMemory();
+    this.maxCPUUsageToStartServices = configuration.maxCPUUsageToStartServices();
+    this.maxServiceConsoleLogCacheSize = configuration.maxServiceConsoleLogCacheSize();
+    this.processTerminationTimeoutSeconds = configuration.processTerminationTimeoutSeconds();
+
+    this.forceInitialClusterDataSync = configuration.forceInitialClusterDataSync();
+    this.printErrorStreamLinesFromServices = configuration.printErrorStreamLinesFromServices();
+    this.runBlockedServiceStartTryLaterAutomatic = configuration.runBlockedServiceStartTryLaterAutomatic();
+
+    this.jvmCommand = configuration.javaCommand();
+    this.hostAddress = configuration.hostAddress();
+    this.connectHostAddress = configuration.connectHostAddress();
+
+    this.properties = configuration.properties();
+    this.restConfiguration = configuration.restConfiguration();
+  }
+
+  @Override
+  public @NonNull String language() {
+    return this.language;
+  }
+
+  @Override
+  public void language(@NonNull String language) {
+    this.language = language;
   }
 
   @Override
@@ -391,13 +442,13 @@ public final class JsonConfiguration implements Configuration {
   }
 
   @Override
-  public @NonNull AccessControlConfiguration accessControlConfig() {
-    return this.accessControlConfiguration;
+  public @NonNull RestConfiguration restConfiguration() {
+    return this.restConfiguration;
   }
 
   @Override
-  public void accessControlConfig(@NonNull AccessControlConfiguration configuration) {
-    this.accessControlConfiguration = configuration;
+  public void restConfiguration(@NonNull RestConfiguration configuration) {
+    this.restConfiguration = configuration;
   }
 
   @Override
