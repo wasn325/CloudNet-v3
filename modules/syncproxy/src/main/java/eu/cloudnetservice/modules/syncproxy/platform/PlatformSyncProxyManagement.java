@@ -16,11 +16,10 @@
 
 package eu.cloudnetservice.modules.syncproxy.platform;
 
-import eu.cloudnetservice.cloudnet.driver.event.EventManager;
-import eu.cloudnetservice.cloudnet.driver.network.rpc.RPCSender;
-import eu.cloudnetservice.cloudnet.driver.service.ServiceEnvironmentType;
-import eu.cloudnetservice.cloudnet.driver.service.ServiceInfoSnapshot;
-import eu.cloudnetservice.cloudnet.wrapper.Wrapper;
+import eu.cloudnetservice.driver.event.EventManager;
+import eu.cloudnetservice.driver.network.rpc.RPCSender;
+import eu.cloudnetservice.driver.service.ServiceEnvironmentType;
+import eu.cloudnetservice.driver.service.ServiceInfoSnapshot;
 import eu.cloudnetservice.modules.bridge.BridgeServiceProperties;
 import eu.cloudnetservice.modules.syncproxy.SyncProxyConfigurationUpdateEvent;
 import eu.cloudnetservice.modules.syncproxy.SyncProxyManagement;
@@ -29,11 +28,13 @@ import eu.cloudnetservice.modules.syncproxy.config.SyncProxyLoginConfiguration;
 import eu.cloudnetservice.modules.syncproxy.config.SyncProxyMotd;
 import eu.cloudnetservice.modules.syncproxy.config.SyncProxyTabList;
 import eu.cloudnetservice.modules.syncproxy.config.SyncProxyTabListConfiguration;
+import eu.cloudnetservice.wrapper.Wrapper;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
@@ -50,6 +51,7 @@ public abstract class PlatformSyncProxyManagement<P> implements SyncProxyManagem
   protected SyncProxyConfiguration configuration;
   protected SyncProxyLoginConfiguration currentLoginConfiguration;
   protected SyncProxyTabListConfiguration currentTabListConfiguration;
+  protected ScheduledFuture<?> currentUpdateTask;
 
   protected PlatformSyncProxyManagement() {
     var wrapper = Wrapper.instance();
@@ -182,14 +184,20 @@ public abstract class PlatformSyncProxyManagement<P> implements SyncProxyManagem
   }
 
   protected void scheduleTabListUpdate() {
+    if (this.currentUpdateTask != null) {
+      this.currentUpdateTask.cancel(true);
+      this.currentUpdateTask = null;
+    }
+
     if (this.currentTabListConfiguration != null && !this.currentTabListConfiguration.entries().isEmpty()) {
-      var tabList = this.currentTabListConfiguration.tick();
-
-      this.schedule(this::scheduleTabListUpdate,
-        (long) (1000D / this.currentTabListConfiguration.animationsPerSecond()),
+      this.currentUpdateTask = Wrapper.instance().taskExecutor().scheduleWithFixedDelay(
+        () -> {
+          var tabList = this.currentTabListConfiguration.tick();
+          this.updateTabList(tabList);
+        },
+        0,
+        (long) (1000 / this.currentTabListConfiguration.animationsPerSecond()),
         TimeUnit.MILLISECONDS);
-
-      this.updateTabList(tabList);
     }
   }
 
@@ -243,8 +251,6 @@ public abstract class PlatformSyncProxyManagement<P> implements SyncProxyManagem
 
     return this.checkPlayerPermission(player, "cloudnet.syncproxy.maintenance");
   }
-
-  public abstract void schedule(@NonNull Runnable runnable, long time, @NonNull TimeUnit unit);
 
   public abstract @NonNull Collection<P> onlinePlayers();
 

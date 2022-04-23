@@ -20,9 +20,9 @@ import com.github.juliarn.npc.profile.Profile;
 import com.google.common.base.Enums;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
-import eu.cloudnetservice.cloudnet.common.document.gson.JsonDocument;
-import eu.cloudnetservice.cloudnet.driver.CloudNetDriver;
-import eu.cloudnetservice.cloudnet.driver.service.GroupConfiguration;
+import eu.cloudnetservice.common.document.gson.JsonDocument;
+import eu.cloudnetservice.driver.CloudNetDriver;
+import eu.cloudnetservice.driver.service.GroupConfiguration;
 import eu.cloudnetservice.ext.bukkitcommands.BaseTabExecutor;
 import eu.cloudnetservice.modules.npc.NPC;
 import eu.cloudnetservice.modules.npc.NPC.ClickAction;
@@ -129,9 +129,9 @@ public final class NPCCommand extends BaseTabExecutor {
           .profileProperties(profile.getProperties().stream()
             .map(property -> new ProfileProperty(property.getName(), property.getValue(), property.getSignature()))
             .collect(Collectors.toSet()))
-          .displayName(displayName)
           .targetGroup(targetGroup)
-          .location(this.management.toWorldPosition(player.getLocation(), player.getWorld(), entry.targetGroup()))
+          .displayName(ChatColor.translateAlternateColorCodes('&', displayName))
+          .location(this.management.toWorldPosition(player.getLocation(), entry.targetGroup()))
           .build();
         this.management.createNPC(npc);
       } else {
@@ -148,9 +148,9 @@ public final class NPCCommand extends BaseTabExecutor {
         // create the npc
         var npc = NPC.builder()
           .entityType(entityType.name())
-          .displayName(displayName)
           .targetGroup(targetGroup)
-          .location(this.management.toWorldPosition(player.getLocation(), player.getWorld(), entry.targetGroup()))
+          .displayName(ChatColor.translateAlternateColorCodes('&', displayName))
+          .location(this.management.toWorldPosition(player.getLocation(), entry.targetGroup()))
           .build();
         this.management.createNPC(npc);
       }
@@ -244,7 +244,7 @@ public final class NPCCommand extends BaseTabExecutor {
           }
           // paste the npc
           var npc = ((NPC.Builder) values.get(0).value())
-            .location(this.management.toWorldPosition(player.getLocation(), player.getWorld(), entry.targetGroup()))
+            .location(this.management.toWorldPosition(player.getLocation(), entry.targetGroup()))
             .build();
           this.management.createNPC(npc);
           sender.sendMessage("§7The service selector mob was pasted §asuccessfully§7!");

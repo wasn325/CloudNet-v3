@@ -16,15 +16,15 @@
 
 package eu.cloudnetservice.modules.smart;
 
-import eu.cloudnetservice.cloudnet.driver.module.ModuleLifeCycle;
-import eu.cloudnetservice.cloudnet.driver.module.ModuleTask;
-import eu.cloudnetservice.cloudnet.driver.module.driver.DriverModule;
-import eu.cloudnetservice.cloudnet.driver.service.ServiceTask;
-import eu.cloudnetservice.cloudnet.node.Node;
+import eu.cloudnetservice.driver.module.ModuleLifeCycle;
+import eu.cloudnetservice.driver.module.ModuleTask;
+import eu.cloudnetservice.driver.module.driver.DriverModule;
+import eu.cloudnetservice.driver.service.ServiceTask;
 import eu.cloudnetservice.modules.smart.SmartServiceTaskConfig.TemplateInstaller;
 import eu.cloudnetservice.modules.smart.listener.CloudNetLocalServiceListener;
 import eu.cloudnetservice.modules.smart.listener.CloudNetLocalServiceTaskListener;
 import eu.cloudnetservice.modules.smart.listener.CloudNetTickListener;
+import eu.cloudnetservice.node.Node;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -84,7 +84,7 @@ public class CloudNetSmartModule extends DriverModule {
       new CloudNetLocalServiceTaskListener(),
       new CloudNetLocalServiceListener(this));
 
-    Node.instance().commandProvider().register(new CommandSmart());
+    Node.instance().commandProvider().register(new SmartCommand());
   }
 
   public @Nullable SmartServiceTaskConfig smartConfig(@NonNull ServiceTask task) {

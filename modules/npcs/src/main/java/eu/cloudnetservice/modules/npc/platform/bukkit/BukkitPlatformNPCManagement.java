@@ -19,9 +19,9 @@ package eu.cloudnetservice.modules.npc.platform.bukkit;
 import com.github.juliarn.npc.NPCPool;
 import com.github.juliarn.npc.modifier.LabyModModifier.LabyModAction;
 import com.google.common.base.Preconditions;
-import eu.cloudnetservice.cloudnet.driver.service.ServiceEnvironmentType;
-import eu.cloudnetservice.cloudnet.driver.service.ServiceInfoSnapshot;
-import eu.cloudnetservice.cloudnet.driver.service.ServiceLifeCycle;
+import eu.cloudnetservice.driver.service.ServiceEnvironmentType;
+import eu.cloudnetservice.driver.service.ServiceInfoSnapshot;
+import eu.cloudnetservice.driver.service.ServiceLifeCycle;
 import eu.cloudnetservice.modules.bridge.WorldPosition;
 import eu.cloudnetservice.modules.npc.NPC;
 import eu.cloudnetservice.modules.npc.NPC.NPCType;
@@ -104,16 +104,16 @@ public class BukkitPlatformNPCManagement extends PlatformNPCManagement<Location,
                       // apply the velocity
                       player.setVelocity(vector);
                       // check if we should send a labymod emote
-                      if (value instanceof NPCBukkitPlatformSelector) {
+                      if (value instanceof NPCBukkitPlatformSelector npcSelector) {
                         if (emoteId == -1) {
                           var emote = labyModEmotes[ThreadLocalRandom.current().nextInt(0, labyModEmotes.length)];
-                          ((NPCBukkitPlatformSelector) value).handleNPC()
+                          npcSelector.handleNPC()
                             .labymod()
                             .queue(LabyModAction.EMOTE, emote)
                             .send(player);
                         } else {
                           // use the selected emote
-                          ((NPCBukkitPlatformSelector) value).handleNPC()
+                          npcSelector.handleNPC()
                             .labymod()
                             .queue(LabyModAction.EMOTE, emoteId)
                             .send(player);

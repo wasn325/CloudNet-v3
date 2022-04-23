@@ -16,17 +16,16 @@
 
 package eu.cloudnetservice.modules.report.paste.emitter.defaults.node;
 
-import eu.cloudnetservice.cloudnet.common.document.gson.JsonDocument;
-import eu.cloudnetservice.cloudnet.driver.module.driver.DriverModule;
-import eu.cloudnetservice.cloudnet.driver.network.cluster.NetworkClusterNodeInfoSnapshot;
-import eu.cloudnetservice.cloudnet.node.Node;
+import eu.cloudnetservice.driver.module.driver.DriverModule;
+import eu.cloudnetservice.driver.network.cluster.NodeInfoSnapshot;
 import eu.cloudnetservice.modules.report.paste.emitter.ReportDataEmitter;
+import eu.cloudnetservice.node.Node;
 import lombok.NonNull;
 
-public class ModuleEmitter implements ReportDataEmitter<NetworkClusterNodeInfoSnapshot> {
+public class ModuleEmitter implements ReportDataEmitter<NodeInfoSnapshot> {
 
   @Override
-  public void emitData(@NonNull StringBuilder builder, @NonNull NetworkClusterNodeInfoSnapshot context) {
+  public void emitData(@NonNull StringBuilder builder, @NonNull NodeInfoSnapshot context) {
     builder
       .append(" - Loaded Modules ")
       .append(context.modules().size())
@@ -36,9 +35,7 @@ public class ModuleEmitter implements ReportDataEmitter<NetworkClusterNodeInfoSn
       builder
         .append(" - Module ")
         .append(module.module().name())
-        .append(" loaded.\n\n")
-        .append(JsonDocument.newDocument(module.moduleConfiguration()).toPrettyJson())
-        .append("\n");
+        .append(" loaded.\n\n");
       if (!module.moduleConfiguration().storesSensitiveData()) {
         builder.append("Configuration: \n")
           .append(((DriverModule) module.module()).readConfig().toPrettyJson())

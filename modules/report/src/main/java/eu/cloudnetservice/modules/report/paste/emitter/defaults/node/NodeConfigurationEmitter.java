@@ -16,16 +16,16 @@
 
 package eu.cloudnetservice.modules.report.paste.emitter.defaults.node;
 
-import eu.cloudnetservice.cloudnet.common.document.gson.JsonDocument;
-import eu.cloudnetservice.cloudnet.driver.network.cluster.NetworkClusterNodeInfoSnapshot;
-import eu.cloudnetservice.cloudnet.node.Node;
+import eu.cloudnetservice.common.document.gson.JsonDocument;
+import eu.cloudnetservice.driver.network.cluster.NodeInfoSnapshot;
 import eu.cloudnetservice.modules.report.paste.emitter.ReportDataEmitter;
+import eu.cloudnetservice.node.Node;
 import lombok.NonNull;
 
-public class NodeConfigurationEmitter implements ReportDataEmitter<NetworkClusterNodeInfoSnapshot> {
+public class NodeConfigurationEmitter implements ReportDataEmitter<NodeInfoSnapshot> {
 
   @Override
-  public void emitData(@NonNull StringBuilder builder, @NonNull NetworkClusterNodeInfoSnapshot context) {
+  public void emitData(@NonNull StringBuilder builder, @NonNull NodeInfoSnapshot context) {
     builder
       .append(" - Node Configuration ")
       .append(context.node().uniqueId())

@@ -20,24 +20,24 @@ import static eu.cloudnetservice.modules.bridge.BridgeManagement.BRIDGE_PLAYER_D
 
 import com.google.common.collect.Iterables;
 import com.google.gson.reflect.TypeToken;
-import eu.cloudnetservice.cloudnet.common.document.gson.JsonDocument;
-import eu.cloudnetservice.cloudnet.common.log.LogManager;
-import eu.cloudnetservice.cloudnet.common.log.Logger;
-import eu.cloudnetservice.cloudnet.driver.module.ModuleLifeCycle;
-import eu.cloudnetservice.cloudnet.driver.module.ModuleTask;
-import eu.cloudnetservice.cloudnet.driver.module.driver.DriverModule;
-import eu.cloudnetservice.cloudnet.driver.network.http.HttpHandler;
-import eu.cloudnetservice.cloudnet.driver.network.rpc.defaults.object.DefaultObjectMapper;
-import eu.cloudnetservice.cloudnet.driver.registry.ServiceRegistry;
-import eu.cloudnetservice.cloudnet.node.Node;
-import eu.cloudnetservice.cloudnet.node.cluster.sync.DataSyncHandler;
+import eu.cloudnetservice.common.document.gson.JsonDocument;
+import eu.cloudnetservice.common.log.LogManager;
+import eu.cloudnetservice.common.log.Logger;
+import eu.cloudnetservice.driver.module.ModuleLifeCycle;
+import eu.cloudnetservice.driver.module.ModuleTask;
+import eu.cloudnetservice.driver.module.driver.DriverModule;
+import eu.cloudnetservice.driver.network.http.HttpHandler;
+import eu.cloudnetservice.driver.network.rpc.defaults.object.DefaultObjectMapper;
+import eu.cloudnetservice.driver.registry.ServiceRegistry;
 import eu.cloudnetservice.modules.bridge.BridgeManagement;
 import eu.cloudnetservice.modules.bridge.config.BridgeConfiguration;
 import eu.cloudnetservice.modules.bridge.config.ProxyFallbackConfiguration;
-import eu.cloudnetservice.modules.bridge.node.command.CommandBridge;
+import eu.cloudnetservice.modules.bridge.node.command.BridgeCommand;
 import eu.cloudnetservice.modules.bridge.node.http.V2HttpHandlerBridge;
 import eu.cloudnetservice.modules.bridge.rpc.ComponentObjectSerializer;
 import eu.cloudnetservice.modules.bridge.rpc.TitleObjectSerializer;
+import eu.cloudnetservice.node.Node;
+import eu.cloudnetservice.node.cluster.sync.DataSyncHandler;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -113,7 +113,7 @@ public final class CloudNetBridgeModule extends DriverModule {
             var networkService = lastProxyInfo.getDocument("networkService");
 
             // rewrite the name of the environment
-            JsonDocument serviceId = networkService.getDocument("serviceId");
+            var serviceId = networkService.getDocument("serviceId");
             var environment = serviceId.getString("environment", "");
             serviceId.append("environmentName", environment);
             // try to set the new environment
@@ -121,6 +121,8 @@ public final class CloudNetBridgeModule extends DriverModule {
               .getEnvironmentType(environment)
               .orElse(null);
             serviceId.append("environment", env);
+            // rewrite the name splitter of the task
+            serviceId.append("nameSplitter", "-");
 
             // rewrite smaller changes
             lastProxyInfo.remove("legacy");
@@ -183,7 +185,7 @@ public final class CloudNetBridgeModule extends DriverModule {
   @ModuleTask(event = ModuleLifeCycle.STARTED)
   public void registerCommand() {
     // register the bridge command
-    Node.instance().commandProvider().register(new CommandBridge(ServiceRegistry.first(BridgeManagement.class)));
+    Node.instance().commandProvider().register(new BridgeCommand(ServiceRegistry.first(BridgeManagement.class)));
   }
 
   @ModuleTask(event = ModuleLifeCycle.RELOADING)

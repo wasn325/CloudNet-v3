@@ -18,12 +18,11 @@ package eu.cloudnetservice.modules.syncproxy.platform.velocity;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import eu.cloudnetservice.cloudnet.driver.registry.ServiceRegistry;
+import eu.cloudnetservice.driver.registry.ServiceRegistry;
 import eu.cloudnetservice.ext.adventure.AdventureSerializerUtil;
 import eu.cloudnetservice.modules.syncproxy.platform.PlatformSyncProxyManagement;
 import java.util.Collection;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import lombok.NonNull;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Contract;
@@ -48,13 +47,6 @@ public final class VelocitySyncProxyManagement extends PlatformSyncProxyManageme
   @Override
   public void unregisterService(@NonNull ServiceRegistry registry) {
     registry.unregisterProvider(PlatformSyncProxyManagement.class, "VelocitySyncProxyManagement");
-  }
-
-  @Override
-  public void schedule(@NonNull Runnable runnable, long time, @NonNull TimeUnit unit) {
-    this.proxyServer.getScheduler().buildTask(this.plugin, runnable)
-      .delay(time, unit)
-      .schedule();
   }
 
   @Override
@@ -112,7 +104,7 @@ public final class VelocitySyncProxyManagement extends PlatformSyncProxyManageme
     return AdventureSerializerUtil.serialize(message);
   }
 
-  private String replaceTabPlaceholder(@NonNull String input, @NonNull Player player) {
+  private @NonNull String replaceTabPlaceholder(@NonNull String input, @NonNull Player player) {
     var server = player.getCurrentServer()
       .map(serverConnection -> serverConnection.getServerInfo().getName())
       .orElse("UNAVAILABLE");

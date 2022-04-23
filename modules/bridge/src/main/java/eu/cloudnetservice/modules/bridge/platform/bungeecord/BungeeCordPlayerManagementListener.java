@@ -19,12 +19,12 @@ package eu.cloudnetservice.modules.bridge.platform.bungeecord;
 import static eu.cloudnetservice.modules.bridge.platform.bungeecord.BungeeCordHelper.translateToComponent;
 import static net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection;
 
-import eu.cloudnetservice.cloudnet.wrapper.Wrapper;
 import eu.cloudnetservice.modules.bridge.BridgeServiceHelper;
 import eu.cloudnetservice.modules.bridge.platform.PlatformBridgeManagement;
 import eu.cloudnetservice.modules.bridge.platform.helper.ProxyPlatformHelper;
 import eu.cloudnetservice.modules.bridge.player.NetworkPlayerProxyInfo;
 import eu.cloudnetservice.modules.bridge.util.BridgeHostAndPortUtil;
+import eu.cloudnetservice.wrapper.Wrapper;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import lombok.NonNull;
@@ -145,18 +145,20 @@ public final class BungeeCordPlayerManagementListener implements Listener {
 
   @EventHandler
   public void handle(@NonNull ServerConnectedEvent event) {
+    var joinedServiceInfo = this.management
+      .cachedService(service -> service.name().equals(event.getServer().getInfo().getName()))
+      .map(BridgeServiceHelper::createServiceInfo)
+      .orElse(null);
     // check if the player connection was initial
     if (event.getPlayer().getServer() == null) {
-      ProxyPlatformHelper.sendChannelMessageLoginSuccess(this.management.createPlayerInformation(event.getPlayer()));
+      ProxyPlatformHelper.sendChannelMessageLoginSuccess(
+        this.management.createPlayerInformation(event.getPlayer()),
+        joinedServiceInfo);
       // update the service info
       Wrapper.instance().publishServiceInfoUpdate();
-    } else {
-      // server switch
+    } else if (joinedServiceInfo != null) {
       // the player switched the service
-      this.management
-        .cachedService(service -> service.name().equals(event.getServer().getInfo().getName()))
-        .map(BridgeServiceHelper::createServiceInfo)
-        .ifPresent(info -> ProxyPlatformHelper.sendChannelMessageServiceSwitch(event.getPlayer().getUniqueId(), info));
+      ProxyPlatformHelper.sendChannelMessageServiceSwitch(event.getPlayer().getUniqueId(), joinedServiceInfo);
     }
     // publish the player connection to the handler
     this.management.handleFallbackConnectionSuccess(event.getPlayer());

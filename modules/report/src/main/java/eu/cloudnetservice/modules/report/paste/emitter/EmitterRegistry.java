@@ -18,8 +18,6 @@ package eu.cloudnetservice.modules.report.paste.emitter;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import eu.cloudnetservice.cloudnet.driver.network.cluster.NetworkClusterNodeInfoSnapshot;
-import eu.cloudnetservice.cloudnet.node.service.CloudService;
 import java.util.Collection;
 import java.util.Collections;
 import lombok.NonNull;
@@ -41,10 +39,12 @@ public class EmitterRegistry {
   }
 
   /**
+   * Get all emitters which are registered for a specific type of data.
+   *
    * @param clazz the class the emitters are registered for.
-   * @param <T>   the type of the report, currently {@link CloudService} & {@link NetworkClusterNodeInfoSnapshot} are
-   *              supported
-   * @return an unmodifiable collection of all emitters for the given class
+   * @param <T>   the type of the data needed to generate the report.
+   * @return an unmodifiable collection of all emitters for the given class.
+   * @throws NullPointerException if the given class is null.
    */
   @UnmodifiableView
   @SuppressWarnings("unchecked")
@@ -58,11 +58,11 @@ public class EmitterRegistry {
   /**
    * Registers the given emitters for the given class in the registry. This is used to append data for a report.
    *
-   * @param clazz   the class to register the emitter for
-   * @param emitter the emitters for the given class appending data
-   * @param <T>     the type of the report, currently {@link CloudService} & {@link NetworkClusterNodeInfoSnapshot} are
-   *                supported
-   * @return the same emitter registry, for chaining
+   * @param clazz   the class to register the emitter for.
+   * @param emitter the emitters for the given class appending data.
+   * @param <T>     the type of the data needed to generate a report.
+   * @return the same emitter registry, for chaining.
+   * @throws NullPointerException if the given class or emitter is null.
    */
   public <T> @NonNull EmitterRegistry registerDataEmitter(
     @NonNull Class<T> clazz,
@@ -75,8 +75,9 @@ public class EmitterRegistry {
   /**
    * Unregisters all emitters that are registered in this registry using the given class.
    *
-   * @param clazz the class that was used to register the emitters
-   * @param <T>   the type of the registered emitters
+   * @param clazz the class that was used to register the emitters.
+   * @param <T>   the type of the registered emitters.
+   * @throws NullPointerException if the given class is null.
    */
   public <T> void unregisterByClass(@NonNull Class<T> clazz) {
     this.emitters.removeAll(clazz);

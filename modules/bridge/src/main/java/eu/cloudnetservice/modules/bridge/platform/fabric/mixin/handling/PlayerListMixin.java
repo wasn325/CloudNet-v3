@@ -16,9 +16,9 @@
 
 package eu.cloudnetservice.modules.bridge.platform.fabric.mixin.handling;
 
-import eu.cloudnetservice.cloudnet.wrapper.Wrapper;
 import eu.cloudnetservice.modules.bridge.platform.fabric.util.BridgedServer;
 import eu.cloudnetservice.modules.bridge.platform.helper.ServerPlatformHelper;
+import eu.cloudnetservice.wrapper.Wrapper;
 import lombok.NonNull;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -57,7 +57,7 @@ public final class PlayerListMixin {
   public void onJoin(@NonNull Connection con, @NonNull ServerPlayer player, @NonNull CallbackInfo info) {
     ServerPlatformHelper.sendChannelMessageLoginSuccess(
       player.getUUID(),
-      ((BridgedServer) this.server).management().ownNetworkServiceInfo());
+      ((BridgedServer) this.server).management().createPlayerInformation(player));
     // update the service info instantly as the player is registered now
     Wrapper.instance().publishServiceInfoUpdate();
   }

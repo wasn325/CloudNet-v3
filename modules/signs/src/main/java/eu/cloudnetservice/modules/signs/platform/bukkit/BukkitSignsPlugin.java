@@ -16,14 +16,14 @@
 
 package eu.cloudnetservice.modules.signs.platform.bukkit;
 
-import eu.cloudnetservice.cloudnet.driver.CloudNetDriver;
-import eu.cloudnetservice.cloudnet.driver.registry.ServiceRegistry;
+import eu.cloudnetservice.driver.CloudNetDriver;
+import eu.cloudnetservice.driver.registry.ServiceRegistry;
 import eu.cloudnetservice.modules.signs.GlobalChannelMessageListener;
 import eu.cloudnetservice.modules.signs.SignManagement;
 import eu.cloudnetservice.modules.signs.platform.PlatformSignManagement;
 import eu.cloudnetservice.modules.signs.platform.SignsPlatformListener;
-import eu.cloudnetservice.modules.signs.platform.bukkit.functionality.CommandSigns;
 import eu.cloudnetservice.modules.signs.platform.bukkit.functionality.SignInteractListener;
+import eu.cloudnetservice.modules.signs.platform.bukkit.functionality.SignsCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Sign;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -38,7 +38,7 @@ public class BukkitSignsPlugin extends JavaPlugin {
     // bukkit command
     var pluginCommand = this.getCommand("cloudsign");
     if (pluginCommand != null) {
-      var commandSigns = new CommandSigns(signManagement);
+      var commandSigns = new SignsCommand(signManagement);
       pluginCommand.setExecutor(commandSigns);
       pluginCommand.setTabCompleter(commandSigns);
     }

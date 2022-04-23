@@ -16,10 +16,10 @@
 
 package eu.cloudnetservice.modules.bridge.platform.listener;
 
-import eu.cloudnetservice.cloudnet.driver.event.EventListener;
-import eu.cloudnetservice.cloudnet.driver.event.EventManager;
-import eu.cloudnetservice.cloudnet.driver.event.events.channel.ChannelMessageReceiveEvent;
-import eu.cloudnetservice.cloudnet.driver.network.buffer.DataBuf;
+import eu.cloudnetservice.driver.event.EventListener;
+import eu.cloudnetservice.driver.event.EventManager;
+import eu.cloudnetservice.driver.event.events.channel.ChannelMessageReceiveEvent;
+import eu.cloudnetservice.driver.network.buffer.DataBuf;
 import eu.cloudnetservice.modules.bridge.BridgeManagement;
 import eu.cloudnetservice.modules.bridge.config.BridgeConfiguration;
 import eu.cloudnetservice.modules.bridge.event.BridgeDeleteCloudOfflinePlayerEvent;
@@ -33,6 +33,7 @@ import eu.cloudnetservice.modules.bridge.event.BridgeUpdateCloudPlayerEvent;
 import eu.cloudnetservice.modules.bridge.platform.PlatformBridgeManagement;
 import eu.cloudnetservice.modules.bridge.player.CloudOfflinePlayer;
 import eu.cloudnetservice.modules.bridge.player.CloudPlayer;
+import eu.cloudnetservice.modules.bridge.player.NetworkPlayerServerInfo;
 import eu.cloudnetservice.modules.bridge.player.NetworkServiceInfo;
 import eu.cloudnetservice.modules.bridge.player.executor.ServerSelectorType;
 import lombok.NonNull;
@@ -121,7 +122,7 @@ public final class PlatformChannelMessageListener {
         case "cloud_player_server_login" -> {
           // read the information
           var player = event.content().readObject(CloudPlayer.class);
-          var serviceInfo = event.content().readObject(NetworkServiceInfo.class);
+          var serviceInfo = event.content().readObject(NetworkPlayerServerInfo.class);
           // fire the event
           this.eventManager.callEvent(new BridgeServerPlayerLoginEvent(player, serviceInfo));
         }
@@ -183,7 +184,9 @@ public final class PlatformChannelMessageListener {
           event.content().readByteArray());
 
         // dispatches the given input string as a command
-        case "spoof_command_execution" -> executor.spoofCommandExecution(event.content().readString());
+        case "spoof_command_execution" -> executor.spoofCommandExecution(
+          event.content().readString(),
+          event.content().readBoolean());
 
         // unable to handle
         default -> {

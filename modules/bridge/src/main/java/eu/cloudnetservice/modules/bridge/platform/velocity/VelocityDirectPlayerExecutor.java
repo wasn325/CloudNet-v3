@@ -19,7 +19,7 @@ package eu.cloudnetservice.modules.bridge.platform.velocity;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
-import eu.cloudnetservice.cloudnet.common.collection.Pair;
+import eu.cloudnetservice.common.collection.Pair;
 import eu.cloudnetservice.modules.bridge.platform.PlatformBridgeManagement;
 import eu.cloudnetservice.modules.bridge.platform.PlatformPlayerExecutorAdapter;
 import eu.cloudnetservice.modules.bridge.player.executor.ServerSelectorType;
@@ -130,7 +130,11 @@ final class VelocityDirectPlayerExecutor extends PlatformPlayerExecutorAdapter<P
   }
 
   @Override
-  public void spoofCommandExecution(@NonNull String command) {
-    this.forEach(player -> player.spoofChatInput('/' + command));
+  public void spoofCommandExecution(@NonNull String command, boolean redirectToServer) {
+    this.forEach(player -> this.proxyServer.getCommandManager().executeAsync(player, command).thenAccept(success -> {
+      if (!success && redirectToServer) {
+        player.spoofChatInput('/' + command);
+      }
+    }));
   }
 }

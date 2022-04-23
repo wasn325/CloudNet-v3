@@ -17,15 +17,16 @@
 package eu.cloudnetservice.modules.bridge.platform.waterdog;
 
 import dev.waterdog.waterdogpe.ProxyServer;
+import dev.waterdog.waterdogpe.event.defaults.InitialServerConnectedEvent;
 import dev.waterdog.waterdogpe.event.defaults.PlayerDisconnectEvent;
 import dev.waterdog.waterdogpe.event.defaults.PlayerLoginEvent;
 import dev.waterdog.waterdogpe.event.defaults.TransferCompleteEvent;
 import dev.waterdog.waterdogpe.player.ProxiedPlayer;
-import eu.cloudnetservice.cloudnet.wrapper.Wrapper;
 import eu.cloudnetservice.modules.bridge.BridgeServiceHelper;
 import eu.cloudnetservice.modules.bridge.platform.PlatformBridgeManagement;
 import eu.cloudnetservice.modules.bridge.platform.helper.ProxyPlatformHelper;
 import eu.cloudnetservice.modules.bridge.player.NetworkPlayerProxyInfo;
+import eu.cloudnetservice.wrapper.Wrapper;
 import java.util.Locale;
 import lombok.NonNull;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -35,13 +36,15 @@ public final class WaterDogPEPlayerManagementListener {
   private final PlatformBridgeManagement<ProxiedPlayer, NetworkPlayerProxyInfo> management;
 
   public WaterDogPEPlayerManagementListener(
+    @NonNull ProxyServer proxyServer,
     @NonNull PlatformBridgeManagement<ProxiedPlayer, NetworkPlayerProxyInfo> management
   ) {
     this.management = management;
     // subscribe to all events
-    ProxyServer.getInstance().getEventManager().subscribe(PlayerLoginEvent.class, this::handleLogin);
-    ProxyServer.getInstance().getEventManager().subscribe(TransferCompleteEvent.class, this::handleTransfer);
-    ProxyServer.getInstance().getEventManager().subscribe(PlayerDisconnectEvent.class, this::handleDisconnected);
+    proxyServer.getEventManager().subscribe(PlayerLoginEvent.class, this::handleLogin);
+    proxyServer.getEventManager().subscribe(TransferCompleteEvent.class, this::handleTransfer);
+    proxyServer.getEventManager().subscribe(PlayerDisconnectEvent.class, this::handleDisconnected);
+    proxyServer.getEventManager().subscribe(InitialServerConnectedEvent.class, this::handleInitialConnect);
   }
 
   private void handleLogin(@NonNull PlayerLoginEvent event) {
@@ -75,19 +78,28 @@ public final class WaterDogPEPlayerManagementListener {
     }
   }
 
-  private void handleTransfer(@NonNull TransferCompleteEvent event) {
-    if (event.getOldClient() == null) {
-      // the player logged in successfully if he is now connected to a service for the first time
-      ProxyPlatformHelper.sendChannelMessageLoginSuccess(this.management.createPlayerInformation(event.getPlayer()));
-      // update the service info
-      Wrapper.instance().publishServiceInfoUpdate();
-    } else {
-      // the player switched the service
+  private void handleInitialConnect(@NonNull InitialServerConnectedEvent event) {
+    // the player logged in successfully if he is now connected to a service for the first time
+    ProxyPlatformHelper.sendChannelMessageLoginSuccess(
+      this.management.createPlayerInformation(event.getPlayer()),
       this.management
-        .cachedService(service -> service.name().equals(event.getNewClient().getServerInfo().getServerName()))
+        .cachedService(service -> service.name().equals(event.getInitialDownstream().getServerInfo().getServerName()))
         .map(BridgeServiceHelper::createServiceInfo)
-        .ifPresent(info -> ProxyPlatformHelper.sendChannelMessageServiceSwitch(event.getPlayer().getUniqueId(), info));
-    }
+        .orElse(null));
+    // update the service info
+    Wrapper.instance().publishServiceInfoUpdate();
+    // notify the management that the player successfully connected to a service
+    this.management.handleFallbackConnectionSuccess(event.getPlayer());
+  }
+
+  private void handleTransfer(@NonNull TransferCompleteEvent event) {
+    this.management
+      .cachedService(service -> service.name().equals(event.getNewClient().getServerInfo().getServerName()))
+      .map(BridgeServiceHelper::createServiceInfo)
+      .ifPresent(serviceInfo -> {
+        // the player switched the service
+        ProxyPlatformHelper.sendChannelMessageServiceSwitch(event.getPlayer().getUniqueId(), serviceInfo);
+      });
     // notify the management that the player successfully connected to a service
     this.management.handleFallbackConnectionSuccess(event.getPlayer());
   }

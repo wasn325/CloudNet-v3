@@ -19,11 +19,11 @@ package eu.cloudnetservice.modules.bridge.platform.waterdog;
 import dev.waterdog.waterdogpe.ProxyServer;
 import dev.waterdog.waterdogpe.player.ProxiedPlayer;
 import dev.waterdog.waterdogpe.plugin.Plugin;
-import eu.cloudnetservice.cloudnet.wrapper.Wrapper;
 import eu.cloudnetservice.modules.bridge.platform.PlatformBridgeManagement;
 import eu.cloudnetservice.modules.bridge.platform.waterdog.command.WaterDogPECloudCommand;
 import eu.cloudnetservice.modules.bridge.platform.waterdog.command.WaterDogPEHubCommand;
 import eu.cloudnetservice.modules.bridge.player.NetworkPlayerProxyInfo;
+import eu.cloudnetservice.wrapper.Wrapper;
 import java.util.Arrays;
 
 public final class WaterDogPEBridgePlugin extends Plugin {
@@ -35,7 +35,7 @@ public final class WaterDogPEBridgePlugin extends Plugin {
     management.registerServices(Wrapper.instance().serviceRegistry());
     management.postInit();
     // register the listeners (registered during the instance creation due to the weird event system)
-    new WaterDogPEPlayerManagementListener(management);
+    new WaterDogPEPlayerManagementListener(this.getProxy(), management);
     // register the WaterDog handlers
     var handlers = new WaterDogPEHandlers(management);
     ProxyServer.getInstance().setReconnectHandler(handlers);

@@ -16,11 +16,10 @@
 
 package eu.cloudnetservice.modules.syncproxy.platform.bungee;
 
-import eu.cloudnetservice.cloudnet.driver.registry.ServiceRegistry;
+import eu.cloudnetservice.driver.registry.ServiceRegistry;
 import eu.cloudnetservice.modules.syncproxy.platform.PlatformSyncProxyManagement;
 import java.util.Collection;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import lombok.NonNull;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -46,11 +45,6 @@ public final class BungeeCordSyncProxyManagement extends PlatformSyncProxyManage
   @Override
   public void unregisterService(@NonNull ServiceRegistry registry) {
     registry.unregisterProvider(PlatformSyncProxyManagement.class, "BungeeCordSyncProxyManagement");
-  }
-
-  @Override
-  public void schedule(@NonNull Runnable runnable, long time, @NonNull TimeUnit unit) {
-    this.plugin.getProxy().getScheduler().schedule(this.plugin, runnable, time, unit);
   }
 
   @Override
@@ -82,11 +76,9 @@ public final class BungeeCordSyncProxyManagement extends PlatformSyncProxyManage
 
   @Override
   public void messagePlayer(@NonNull ProxiedPlayer player, @Nullable String message) {
-    if (message == null) {
-      return;
+    if (message != null) {
+      player.sendMessage(this.asComponent(message));
     }
-
-    player.sendMessage(this.asComponent(message));
   }
 
   @Override
@@ -94,12 +86,12 @@ public final class BungeeCordSyncProxyManagement extends PlatformSyncProxyManage
     return player.hasPermission(permission);
   }
 
-  @Nullable BaseComponent[] asComponent(@Nullable String message) {
-    if (message == null) {
+  public @Nullable BaseComponent[] asComponent(@Nullable String message) {
+    if (message != null) {
+      return TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', message));
+    } else {
       return null;
     }
-
-    return TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', message));
   }
 
   private @Nullable String replaceTabPlaceholder(@Nullable String input, @NonNull ProxiedPlayer player) {

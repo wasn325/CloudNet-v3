@@ -16,11 +16,10 @@
 
 package eu.cloudnetservice.modules.signs.platform;
 
-import eu.cloudnetservice.cloudnet.driver.channel.ChannelMessage;
-import eu.cloudnetservice.cloudnet.driver.channel.ChannelMessageTarget;
-import eu.cloudnetservice.cloudnet.driver.network.buffer.DataBuf;
-import eu.cloudnetservice.cloudnet.driver.service.ServiceInfoSnapshot;
-import eu.cloudnetservice.cloudnet.wrapper.Wrapper;
+import eu.cloudnetservice.driver.channel.ChannelMessage;
+import eu.cloudnetservice.driver.channel.ChannelMessageTarget;
+import eu.cloudnetservice.driver.network.buffer.DataBuf;
+import eu.cloudnetservice.driver.service.ServiceInfoSnapshot;
 import eu.cloudnetservice.modules.bridge.WorldPosition;
 import eu.cloudnetservice.modules.signs.AbstractSignManagement;
 import eu.cloudnetservice.modules.signs.Sign;
@@ -28,6 +27,7 @@ import eu.cloudnetservice.modules.signs.SignManagement;
 import eu.cloudnetservice.modules.signs.configuration.SignConfigurationEntry;
 import eu.cloudnetservice.modules.signs.configuration.SignLayoutsHolder;
 import eu.cloudnetservice.modules.signs.configuration.SignsConfiguration;
+import eu.cloudnetservice.wrapper.Wrapper;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -47,7 +47,9 @@ public abstract class PlatformSignManagement<T> extends AbstractSignManagement i
   public static final String SIGN_GET_SIGNS_BY_GROUPS = "signs_get_signs_by_groups";
 
   /**
-   * {@inheritDoc}
+   * Constructs a new platform sign management.
+   *
+   * @param signsConfiguration the sign configuration to use.
    */
   protected PlatformSignManagement(SignsConfiguration signsConfiguration) {
     super(signsConfiguration);

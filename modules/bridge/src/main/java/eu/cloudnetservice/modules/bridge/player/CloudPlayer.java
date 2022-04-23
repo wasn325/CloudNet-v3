@@ -16,8 +16,8 @@
 
 package eu.cloudnetservice.modules.bridge.player;
 
-import eu.cloudnetservice.cloudnet.common.document.gson.JsonDocument;
-import eu.cloudnetservice.cloudnet.driver.CloudNetDriver;
+import eu.cloudnetservice.common.document.gson.JsonDocument;
+import eu.cloudnetservice.driver.CloudNetDriver;
 import eu.cloudnetservice.modules.bridge.player.executor.PlayerExecutor;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
@@ -87,6 +87,7 @@ public class CloudPlayer extends CloudOfflinePlayer {
 
   public void networkPlayerServerInfo(NetworkPlayerServerInfo networkPlayerServerInfo) {
     this.networkPlayerServerInfo = networkPlayerServerInfo;
+    this.connectedService = networkPlayerServerInfo.networkService();
   }
 
   public @NonNull JsonDocument onlineProperties() {

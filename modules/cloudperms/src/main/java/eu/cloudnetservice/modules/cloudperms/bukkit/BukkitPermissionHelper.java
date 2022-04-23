@@ -21,8 +21,9 @@ import static dev.derklaro.reflexion.matcher.FieldMatcher.newMatcher;
 import dev.derklaro.reflexion.FieldAccessor;
 import dev.derklaro.reflexion.MethodAccessor;
 import dev.derklaro.reflexion.Reflexion;
-import eu.cloudnetservice.cloudnet.driver.CloudNetDriver;
+import eu.cloudnetservice.driver.CloudNetDriver;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 import lombok.NonNull;
@@ -55,7 +56,9 @@ public final class BukkitPermissionHelper {
         "org.bukkit.craftbukkit" + SERVER_PACKAGE_VERSION + "entity.CraftHumanEntity",
         "net.glowstone.entity.GlowHumanEntity"
       )
-      .flatMap(reflexion -> reflexion.findField(newMatcher().derivedType(Field::getType, Permissible.class)))
+      .flatMap(reflexion -> reflexion.findField(newMatcher()
+        .denyModifier(Modifier.STATIC)
+        .derivedType(Field::getType, Permissible.class)))
       .orElseThrow(() -> new NoSuchElementException("Unable to resolve permissible field of player"));
 
     // accessor to re-send the command tree to a player

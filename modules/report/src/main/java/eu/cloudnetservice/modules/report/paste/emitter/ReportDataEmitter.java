@@ -16,14 +16,14 @@
 
 package eu.cloudnetservice.modules.report.paste.emitter;
 
-import eu.cloudnetservice.cloudnet.node.service.CloudService;
+import eu.cloudnetservice.node.service.CloudService;
 import lombok.NonNull;
 
 /**
  * Represents an emitter for collecting data for reports of this module. An emitter can be registered using {@link
  * EmitterRegistry#registerDataEmitter(Class, ReportDataEmitter)}
  *
- * @param <T> the context type that the data is collected for
+ * @param <T> the context type that the data is collected for.
  */
 @FunctionalInterface
 public interface ReportDataEmitter<T> {
@@ -31,8 +31,9 @@ public interface ReportDataEmitter<T> {
   /**
    * Adds data while creating a paste for support and debugging purposes.
    *
-   * @param builder the already collected data, just append it to this one
-   * @param context the context of the report, like {@link CloudService}
+   * @param builder the already collected data, just append it to this one.
+   * @param context the context of the report, like {@link CloudService}.
+   * @throws NullPointerException if the given builder or context is null.
    */
   void emitData(@NonNull StringBuilder builder, @NonNull T context);
 

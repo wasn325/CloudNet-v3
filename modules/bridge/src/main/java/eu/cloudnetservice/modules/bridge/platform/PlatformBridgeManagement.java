@@ -16,15 +16,15 @@
 
 package eu.cloudnetservice.modules.bridge.platform;
 
-import eu.cloudnetservice.cloudnet.common.collection.Pair;
-import eu.cloudnetservice.cloudnet.driver.CloudNetDriver;
-import eu.cloudnetservice.cloudnet.driver.event.EventManager;
-import eu.cloudnetservice.cloudnet.driver.network.rpc.RPCSender;
-import eu.cloudnetservice.cloudnet.driver.network.rpc.defaults.object.DefaultObjectMapper;
-import eu.cloudnetservice.cloudnet.driver.service.ServiceInfoSnapshot;
-import eu.cloudnetservice.cloudnet.driver.service.ServiceLifeCycle;
-import eu.cloudnetservice.cloudnet.driver.service.ServiceTask;
-import eu.cloudnetservice.cloudnet.wrapper.Wrapper;
+import eu.cloudnetservice.common.collection.Pair;
+import eu.cloudnetservice.driver.CloudNetDriver;
+import eu.cloudnetservice.driver.event.EventManager;
+import eu.cloudnetservice.driver.network.rpc.RPCSender;
+import eu.cloudnetservice.driver.network.rpc.defaults.object.DefaultObjectMapper;
+import eu.cloudnetservice.driver.network.rpc.generation.GenerationContext;
+import eu.cloudnetservice.driver.service.ServiceInfoSnapshot;
+import eu.cloudnetservice.driver.service.ServiceLifeCycle;
+import eu.cloudnetservice.driver.service.ServiceTask;
 import eu.cloudnetservice.modules.bridge.BridgeManagement;
 import eu.cloudnetservice.modules.bridge.BridgeServiceHelper;
 import eu.cloudnetservice.modules.bridge.BridgeServiceProperties;
@@ -41,6 +41,7 @@ import eu.cloudnetservice.modules.bridge.player.ServicePlayer;
 import eu.cloudnetservice.modules.bridge.player.executor.PlayerExecutor;
 import eu.cloudnetservice.modules.bridge.rpc.ComponentObjectSerializer;
 import eu.cloudnetservice.modules.bridge.rpc.TitleObjectSerializer;
+import eu.cloudnetservice.wrapper.Wrapper;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -92,7 +93,9 @@ public abstract class PlatformBridgeManagement<P, I> implements BridgeManagement
       .registerBinding(Title.class, new TitleObjectSerializer(), false)
       .registerBinding(Component.class, new ComponentObjectSerializer(), false);
     // init the player manager once
-    this.playerManager = new PlatformPlayerManager(wrapper);
+    this.playerManager = wrapper.rpcFactory().generateRPCBasedApi(
+      PlayerManager.class,
+      GenerationContext.forClass(PlatformPlayerManager.class).build());
     this.sender = wrapper.rpcFactory().providerForClass(wrapper.networkClient(), BridgeManagement.class);
     // create the network service info of this service
     this.ownNetworkServiceInfo = BridgeServiceHelper.createServiceInfo(wrapper.currentServiceInfo());
@@ -196,7 +199,7 @@ public abstract class PlatformBridgeManagement<P, I> implements BridgeManagement
       // get all services we have cached of the task
       .map(fallback -> new Pair<>(fallback, this.anyTaskService(fallback.task(), profile, currentServerName)))
       // filter out all fallbacks that have no services
-      .filter(possibility -> possibility.second().isEmpty())
+      .filter(possibility -> possibility.second().isPresent())
       // get the first possibility with the highest priority
       .min(Comparator.comparing(Pair::first))
       // extract the target service

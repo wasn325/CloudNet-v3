@@ -35,15 +35,15 @@ import com.github.dockerjava.api.model.RestartPolicy;
 import com.github.dockerjava.api.model.Volume;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import eu.cloudnetservice.cloudnet.driver.event.EventManager;
-import eu.cloudnetservice.cloudnet.driver.service.ServiceConfiguration;
-import eu.cloudnetservice.cloudnet.node.Node;
-import eu.cloudnetservice.cloudnet.node.service.CloudServiceManager;
-import eu.cloudnetservice.cloudnet.node.service.ServiceConfigurationPreparer;
-import eu.cloudnetservice.cloudnet.node.service.defaults.JVMService;
+import eu.cloudnetservice.driver.event.EventManager;
+import eu.cloudnetservice.driver.service.ServiceConfiguration;
 import eu.cloudnetservice.modules.docker.config.DockerConfiguration;
 import eu.cloudnetservice.modules.docker.config.DockerImage;
 import eu.cloudnetservice.modules.docker.config.TaskDockerConfig;
+import eu.cloudnetservice.node.Node;
+import eu.cloudnetservice.node.service.CloudServiceManager;
+import eu.cloudnetservice.node.service.ServiceConfigurationPreparer;
+import eu.cloudnetservice.node.service.defaults.JVMService;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
@@ -66,7 +66,8 @@ public class DockerizedService extends JVMService {
   protected static final Map<String, String> LOGGING_OPTIONS = Map.of(
     "max-file", "1",
     "max-size", "5m",
-    "compress", "false");
+    "compress", "false",
+    "mode", "non-blocking");
   // drop some kernel capabilities which no normal minecraft server could ever need for anything
   protected static final Capability[] DROPPED_CAPABILITIES = EnumSet.of(
     Capability.MKNOD,
@@ -197,7 +198,7 @@ public class DockerizedService extends JVMService {
           .withCapDrop(DROPPED_CAPABILITIES)
           .withRestartPolicy(RestartPolicy.noRestart())
           .withNetworkMode(this.configuration.network())
-          .withLogConfig(new LogConfig(LoggingType.JSON_FILE, LOGGING_OPTIONS)))
+          .withLogConfig(new LogConfig(LoggingType.LOCAL, LOGGING_OPTIONS)))
         .withLabels(Map.of(
           "Service", "CloudNet",
           "Name", this.serviceId().name(),
@@ -297,7 +298,7 @@ public class DockerizedService extends JVMService {
   }
 
   protected @NonNull <T> Optional<T> readFromTaskConfig(@NonNull Function<TaskDockerConfig, T> reader) {
-    var config = this.serviceConfiguration.properties().get("docker", TaskDockerConfig.class);
+    var config = this.serviceConfiguration.properties().get("dockerConfig", TaskDockerConfig.class);
     return config == null ? Optional.empty() : Optional.ofNullable(reader.apply(config));
   }
 

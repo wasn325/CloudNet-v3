@@ -33,11 +33,11 @@ import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
-import eu.cloudnetservice.cloudnet.wrapper.Wrapper;
 import eu.cloudnetservice.modules.bridge.BridgeServiceHelper;
 import eu.cloudnetservice.modules.bridge.platform.PlatformBridgeManagement;
 import eu.cloudnetservice.modules.bridge.platform.helper.ProxyPlatformHelper;
 import eu.cloudnetservice.modules.bridge.player.NetworkPlayerProxyInfo;
+import eu.cloudnetservice.wrapper.Wrapper;
 import java.util.Locale;
 import lombok.NonNull;
 import net.kyori.adventure.identity.Identity;
@@ -108,10 +108,10 @@ public final class VelocityPlayerManagementListener {
           var curServer = event.getPlayer().getCurrentServer().map(ServerConnection::getServerInfo).orElse(null);
           if (event.kickedDuringServerConnect() && curServer != null && curServer.equals(server.getServerInfo())) {
             // send the player a nice message - velocity will keep the connection to the current server
-            return Notify.create(this.getReasonComponent(event));
+            return Notify.create(this.extractReasonComponent(event));
           } else {
             // send the player a reason message
-            event.getPlayer().sendMessage(Identity.nil(), this.getReasonComponent(event));
+            event.getPlayer().sendMessage(Identity.nil(), this.extractReasonComponent(event));
             // redirect the player to the next available hub server
             return RedirectPlayer.create(server);
           }
@@ -124,18 +124,22 @@ public final class VelocityPlayerManagementListener {
 
   @Subscribe
   public void handleServiceConnected(@NonNull ServerPostConnectEvent event) {
+    var joinedServiceInfo = event.getPlayer().getCurrentServer()
+      .flatMap(server -> this.management
+        .cachedService(service -> server.getServerInfo().getName().equals(service.name()))
+        .map(BridgeServiceHelper::createServiceInfo))
+      .orElse(null);
+    // check if the connection was initial
     if (event.getPreviousServer() == null) {
       // the player logged in successfully if he is now connected to a service for the first time
-      ProxyPlatformHelper.sendChannelMessageLoginSuccess(this.management.createPlayerInformation(event.getPlayer()));
+      ProxyPlatformHelper.sendChannelMessageLoginSuccess(
+        this.management.createPlayerInformation(event.getPlayer()),
+        joinedServiceInfo);
       // update the service info
       Wrapper.instance().publishServiceInfoUpdate();
-    } else {
+    } else if (joinedServiceInfo != null) {
       // the player switched the service
-      event.getPlayer().getCurrentServer()
-        .flatMap(server -> this.management
-          .cachedService(service -> server.getServerInfo().getName().equals(service.name()))
-          .map(BridgeServiceHelper::createServiceInfo))
-        .ifPresent(info -> ProxyPlatformHelper.sendChannelMessageServiceSwitch(event.getPlayer().getUniqueId(), info));
+      ProxyPlatformHelper.sendChannelMessageServiceSwitch(event.getPlayer().getUniqueId(), joinedServiceInfo);
     }
     // notify the management that the player successfully connected to a service
     this.management.handleFallbackConnectionSuccess(event.getPlayer());
@@ -155,7 +159,7 @@ public final class VelocityPlayerManagementListener {
     this.management.removeFallbackProfile(event.getPlayer());
   }
 
-  private @NonNull Component getReasonComponent(@NonNull KickedFromServerEvent event) {
+  private @NonNull Component extractReasonComponent(@NonNull KickedFromServerEvent event) {
     var playerLocale = event.getPlayer().getEffectiveLocale();
     var message = event.getServerKickReason().orElse(null);
     // use the current result if it is Notify - velocity already created a friendly reason for us

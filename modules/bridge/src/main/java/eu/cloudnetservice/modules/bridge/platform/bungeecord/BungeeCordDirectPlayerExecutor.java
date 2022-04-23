@@ -19,7 +19,7 @@ package eu.cloudnetservice.modules.bridge.platform.bungeecord;
 import static net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection;
 import static net.md_5.bungee.api.chat.TextComponent.fromLegacyText;
 
-import eu.cloudnetservice.cloudnet.common.collection.Pair;
+import eu.cloudnetservice.common.collection.Pair;
 import eu.cloudnetservice.modules.bridge.platform.PlatformBridgeManagement;
 import eu.cloudnetservice.modules.bridge.platform.PlatformPlayerExecutorAdapter;
 import eu.cloudnetservice.modules.bridge.player.executor.ServerSelectorType;
@@ -133,7 +133,11 @@ final class BungeeCordDirectPlayerExecutor extends PlatformPlayerExecutorAdapter
   }
 
   @Override
-  public void spoofCommandExecution(@NonNull String command) {
-    this.forEach(player -> player.chat('/' + command));
+  public void spoofCommandExecution(@NonNull String command, boolean redirectToServer) {
+    this.forEach(player -> {
+      if (!ProxyServer.getInstance().getPluginManager().dispatchCommand(player, command) && redirectToServer) {
+        player.chat('/' + command);
+      }
+    });
   }
 }

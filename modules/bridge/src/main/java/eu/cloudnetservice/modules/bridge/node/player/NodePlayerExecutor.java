@@ -17,9 +17,9 @@
 package eu.cloudnetservice.modules.bridge.node.player;
 
 import com.google.common.base.Preconditions;
-import eu.cloudnetservice.cloudnet.driver.channel.ChannelMessage;
-import eu.cloudnetservice.cloudnet.driver.network.buffer.DataBuf;
-import eu.cloudnetservice.cloudnet.driver.service.ServiceEnvironmentType;
+import eu.cloudnetservice.driver.channel.ChannelMessage;
+import eu.cloudnetservice.driver.network.buffer.DataBuf;
+import eu.cloudnetservice.driver.service.ServiceEnvironmentType;
 import eu.cloudnetservice.modules.bridge.BridgeManagement;
 import eu.cloudnetservice.modules.bridge.player.PlayerManager;
 import eu.cloudnetservice.modules.bridge.player.executor.PlayerExecutor;
@@ -144,10 +144,10 @@ public class NodePlayerExecutor implements PlayerExecutor {
   }
 
   @Override
-  public void spoofCommandExecution(@NonNull String command) {
+  public void spoofCommandExecution(@NonNull String command, boolean redirectToServer) {
     this.toProxy()
       .message("spoof_command_execution")
-      .buffer(DataBuf.empty().writeUniqueId(this.targetUniqueId).writeString(command))
+      .buffer(DataBuf.empty().writeUniqueId(this.targetUniqueId).writeString(command).writeBoolean(redirectToServer))
       .build()
       .send();
   }
