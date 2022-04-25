@@ -17,11 +17,11 @@
 package eu.cloudnetservice.modules.cloudperms.minestom;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import eu.cloudnetservice.cloudnet.driver.CloudNetDriver;
-import eu.cloudnetservice.cloudnet.wrapper.Wrapper;
+import eu.cloudnetservice.driver.CloudNetDriver;
 import eu.cloudnetservice.modules.cloudperms.PermissionsUpdateListener;
 import eu.cloudnetservice.modules.cloudperms.minestom.listener.MinestomCloudPermissionsPlayerListener;
 import eu.cloudnetservice.modules.cloudperms.minestom.player.CloudPlayer;
+import eu.cloudnetservice.wrapper.Wrapper;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.extensions.Extension;

@@ -131,7 +131,7 @@ public final class NPCCommand extends BaseTabExecutor {
             .collect(Collectors.toSet()))
           .targetGroup(targetGroup)
           .displayName(ChatColor.translateAlternateColorCodes('&', displayName))
-          .location(this.management.toWorldPosition(player.getLocation(), entry.targetGroup()))
+          .location(this.management.toWorldPosition(player.getLocation(), player.getWorld(), entry.targetGroup()))
           .build();
         this.management.createNPC(npc);
       } else {
@@ -150,7 +150,7 @@ public final class NPCCommand extends BaseTabExecutor {
           .entityType(entityType.name())
           .targetGroup(targetGroup)
           .displayName(ChatColor.translateAlternateColorCodes('&', displayName))
-          .location(this.management.toWorldPosition(player.getLocation(), entry.targetGroup()))
+          .location(this.management.toWorldPosition(player.getLocation(), player.getWorld(), entry.targetGroup()))
           .build();
         this.management.createNPC(npc);
       }
@@ -244,7 +244,7 @@ public final class NPCCommand extends BaseTabExecutor {
           }
           // paste the npc
           var npc = ((NPC.Builder) values.get(0).value())
-            .location(this.management.toWorldPosition(player.getLocation(), entry.targetGroup()))
+            .location(this.management.toWorldPosition(player.getLocation(), player.getWorld(), entry.targetGroup()))
             .build();
           this.management.createNPC(npc);
           sender.sendMessage("§7The service selector mob was pasted §asuccessfully§7!");

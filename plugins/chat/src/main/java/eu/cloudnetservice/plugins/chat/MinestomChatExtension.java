@@ -16,7 +16,7 @@
 
 package eu.cloudnetservice.plugins.chat;
 
-import eu.cloudnetservice.cloudnet.common.document.gson.JsonDocument;
+import eu.cloudnetservice.common.document.gson.JsonDocument;
 import java.nio.file.Paths;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;

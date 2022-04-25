@@ -16,9 +16,9 @@
 
 package eu.cloudnetservice.modules.cloudperms.minestom.player;
 
-import eu.cloudnetservice.cloudnet.driver.CloudNetDriver;
-import eu.cloudnetservice.cloudnet.driver.permission.PermissionManagement;
-import eu.cloudnetservice.cloudnet.driver.permission.PermissionUser;
+import eu.cloudnetservice.driver.CloudNetDriver;
+import eu.cloudnetservice.driver.permission.PermissionManagement;
+import eu.cloudnetservice.driver.permission.PermissionUser;
 import java.util.UUID;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.player.PlayerConnection;
@@ -56,7 +56,7 @@ public class CloudPlayer extends Player {
     if (user == null) {
       return super.hasPermission(permissionName, permissionVerifier);
     }
-    return management.hasPermission(user, eu.cloudnetservice.cloudnet.driver.permission.Permission.of(permissionName))
+    return management.hasPermission(user, eu.cloudnetservice.driver.permission.Permission.of(permissionName))
       || super.hasPermission(permissionName, permissionVerifier);
   }
 }

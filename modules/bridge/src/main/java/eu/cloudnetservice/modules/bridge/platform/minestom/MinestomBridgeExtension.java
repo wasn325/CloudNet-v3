@@ -16,9 +16,11 @@
 
 package eu.cloudnetservice.modules.bridge.platform.minestom;
 
-import eu.cloudnetservice.cloudnet.common.log.LogManager;
-import eu.cloudnetservice.cloudnet.wrapper.Wrapper;
+import eu.cloudnetservice.common.log.LogManager;
 import eu.cloudnetservice.modules.bridge.platform.PlatformBridgeManagement;
+import eu.cloudnetservice.modules.bridge.player.NetworkPlayerServerInfo;
+import eu.cloudnetservice.wrapper.Wrapper;
+import net.minestom.server.entity.Player;
 import net.minestom.server.extensions.Extension;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
@@ -28,7 +30,7 @@ public class MinestomBridgeExtension extends Extension {
 
   @Override
   public void initialize() {
-    PlatformBridgeManagement<?, ?> management = new MinestomBridgeManagement(this);
+    PlatformBridgeManagement<Player, NetworkPlayerServerInfo> management = new MinestomBridgeManagement(this);
     management.registerServices(Wrapper.instance().serviceRegistry());
     management.postInit();
     // minestom listeners

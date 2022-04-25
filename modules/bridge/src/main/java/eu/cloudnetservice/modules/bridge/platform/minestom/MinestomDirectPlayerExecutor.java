@@ -29,25 +29,17 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.extensions.Extension;
 import org.jetbrains.annotations.Nullable;
 
-public class MinestomDirectPlayerExecutor extends PlatformPlayerExecutorAdapter {
+public class MinestomDirectPlayerExecutor extends PlatformPlayerExecutorAdapter<Player> {
 
   private final Extension extension;
-  private final UUID targetUniqueId;
-  private final Supplier<Collection<? extends Player>> playerSupplier;
 
   public MinestomDirectPlayerExecutor(
     @NonNull Extension extension,
     @NonNull UUID target,
     @NonNull Supplier<Collection<? extends Player>> playerSupplier
   ) {
+    super(target, playerSupplier);
     this.extension = extension;
-    this.targetUniqueId = target;
-    this.playerSupplier = playerSupplier;
-  }
-
-  @Override
-  public @NonNull UUID uniqueId() {
-    return this.targetUniqueId;
   }
 
   @Override
@@ -109,8 +101,8 @@ public class MinestomDirectPlayerExecutor extends PlatformPlayerExecutorAdapter 
   }
 
   @Override
-  public void spoofChatInput(@NonNull String command) {
-    this.playerSupplier.get().forEach(player -> player.chat(command));
+  public void spoofCommandExecution(@NonNull String command, boolean redirectToServer) {
+    this.forEach(player -> player.chat('/' + command));
   }
 
 }

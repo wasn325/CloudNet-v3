@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package eu.cloudnetservice.cloudnet.node.service.defaults.config;
+package eu.cloudnetservice.node.service.defaults.config;
 
-import eu.cloudnetservice.cloudnet.node.CloudNet;
-import eu.cloudnetservice.cloudnet.node.service.CloudService;
+import eu.cloudnetservice.node.Node;
+import eu.cloudnetservice.node.service.CloudService;
 import lombok.NonNull;
 
 public class MinestomConfigurationPreparer extends AbstractServiceConfigurationPreparer {
 
   @Override
-  public void configure(@NonNull CloudNet nodeInstance,
+  public void configure(@NonNull Node nodeInstance,
     @NonNull CloudService cloudService) {
 
   }

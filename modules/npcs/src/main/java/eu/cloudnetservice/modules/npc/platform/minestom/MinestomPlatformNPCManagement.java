@@ -18,9 +18,9 @@ package eu.cloudnetservice.modules.npc.platform.minestom;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import eu.cloudnetservice.cloudnet.driver.service.ServiceEnvironmentType;
-import eu.cloudnetservice.cloudnet.driver.service.ServiceInfoSnapshot;
-import eu.cloudnetservice.cloudnet.driver.service.ServiceLifeCycle;
+import eu.cloudnetservice.driver.service.ServiceEnvironmentType;
+import eu.cloudnetservice.driver.service.ServiceInfoSnapshot;
+import eu.cloudnetservice.driver.service.ServiceLifeCycle;
 import eu.cloudnetservice.modules.bridge.WorldPosition;
 import eu.cloudnetservice.modules.npc.NPC;
 import eu.cloudnetservice.modules.npc.NPC.NPCType;
@@ -85,25 +85,25 @@ public class MinestomPlatformNPCManagement extends PlatformNPCManagement<Pos, In
                     // apply the velocity
                     player.setVelocity(vector);
                     // check if we should send a labymod emote
-                      if (value instanceof FakePlayer fp) {
-                        if (emoteId == -1) {
-                          emoteId = labyModEmotes[ThreadLocalRandom.current().nextInt(0, labyModEmotes.length)];
-                        }
-
-                        JsonArray array = new JsonArray();
-                        JsonObject forcedEmote = new JsonObject();
-                        forcedEmote.addProperty( "uuid", fp.getUuid().toString() );
-                        forcedEmote.addProperty( "emote_id", emoteId );
-                        array.add(forcedEmote);
-
-                        //TODO test if the data can be sent directly as String
-                        byte[] data = LabymodUtils.getBytesToSend("emote_api", array.toString());
-
-                        MinecraftServer
-                          .getConnectionManager()
-                          .getOnlinePlayers()
-                          .forEach(p -> p.sendPluginMessage("labymod3:main", data));
+                    if (value instanceof FakePlayer fp) {
+                      if (emoteId == -1) {
+                        emoteId = labyModEmotes[ThreadLocalRandom.current().nextInt(0, labyModEmotes.length)];
                       }
+
+                      JsonArray array = new JsonArray();
+                      JsonObject forcedEmote = new JsonObject();
+                      forcedEmote.addProperty("uuid", fp.getUuid().toString());
+                      forcedEmote.addProperty("emote_id", emoteId);
+                      array.add(forcedEmote);
+
+                      //TODO test if the data can be sent directly as String
+                      byte[] data = LabymodUtils.getBytesToSend("emote_api", array.toString());
+
+                      MinecraftServer
+                        .getConnectionManager()
+                        .getOnlinePlayers()
+                        .forEach(p -> p.sendPluginMessage("labymod3:main", data));
+                    }
                   }
                 }
               }
@@ -181,11 +181,11 @@ public class MinestomPlatformNPCManagement extends PlatformNPCManagement<Pos, In
               if (emoteId == -1) {
                 emoteId = emotes[ThreadLocalRandom.current().nextInt(0, emotes.length)];
               }
-              if(npc instanceof FakePlayer fp) {
+              if (npc instanceof FakePlayer fp) {
                 JsonArray array = new JsonArray();
                 JsonObject forcedEmote = new JsonObject();
-                forcedEmote.addProperty( "uuid", fp.getUuid().toString() );
-                forcedEmote.addProperty( "emote_id", emoteId );
+                forcedEmote.addProperty("uuid", fp.getUuid().toString());
+                forcedEmote.addProperty("emote_id", emoteId);
                 array.add(forcedEmote);
 
                 //TODO test if the data can be sent directly as String

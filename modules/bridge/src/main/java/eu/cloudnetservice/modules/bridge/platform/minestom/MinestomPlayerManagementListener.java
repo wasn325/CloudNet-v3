@@ -16,12 +16,14 @@
 
 package eu.cloudnetservice.modules.bridge.platform.minestom;
 
-import eu.cloudnetservice.cloudnet.wrapper.Wrapper;
 import eu.cloudnetservice.modules.bridge.platform.PlatformBridgeManagement;
 import eu.cloudnetservice.modules.bridge.platform.helper.ServerPlatformHelper;
+import eu.cloudnetservice.modules.bridge.player.NetworkPlayerServerInfo;
+import eu.cloudnetservice.wrapper.Wrapper;
 import java.util.Locale;
 import lombok.NonNull;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
@@ -32,11 +34,11 @@ import net.minestom.server.extensions.Extension;
 public class MinestomPlayerManagementListener {
 
   private final Extension extension;
-  private final PlatformBridgeManagement<?, ?> management;
+  private final PlatformBridgeManagement<Player, NetworkPlayerServerInfo> management;
   private final EventNode<PlayerEvent> node = EventNode.type("bridge", EventFilter.PLAYER);
 
   public MinestomPlayerManagementListener(@NonNull Extension extension,
-    @NonNull PlatformBridgeManagement<?, ?> management) {
+    @NonNull PlatformBridgeManagement<Player, NetworkPlayerServerInfo> management) {
     this.extension = extension;
     this.management = management;
     initListeners();
@@ -67,7 +69,7 @@ public class MinestomPlayerManagementListener {
 
         ServerPlatformHelper.sendChannelMessageLoginSuccess(
           event.getPlayer().getUuid(),
-          this.management.ownNetworkServiceInfo());
+          this.management.createPlayerInformation(event.getPlayer()));
         // update the service info in the next tick
         MinecraftServer.getSchedulerManager()
           .buildTask(() -> Wrapper.instance().publishServiceInfoUpdate())

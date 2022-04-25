@@ -138,7 +138,7 @@ public class JVMService extends AbstractService {
     arguments.add("-Dcloudnet.wrapper.messages.language=" + I18n.language());
 
     // set the required variables for minestom services
-    if (this.serviceId().environment() == ServiceEnvironmentType.MINESTOM_SERVER) {
+    if (this.serviceId().environment().name().equalsIgnoreCase(ServiceEnvironmentType.MINESTOM_SERVER.name())) {
       arguments.add("-Dcloudnet.host=" + this.currentServiceInfo.address().host());
       arguments.add("-Dcloudnet.port=" + this.currentServiceInfo.address().port());
     }
