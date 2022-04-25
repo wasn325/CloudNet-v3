@@ -20,7 +20,7 @@ import eu.cloudnetservice.node.Node;
 import eu.cloudnetservice.node.service.CloudService;
 import lombok.NonNull;
 
-public class MinestomConfigurationPreparer extends AbstractServiceConfigurationPreparer {
+public class DummyConfigurationPreparer extends AbstractServiceConfigurationPreparer {
 
   @Override
   public void configure(@NonNull Node nodeInstance,

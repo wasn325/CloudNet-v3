@@ -45,7 +45,7 @@ public interface CloudServiceManager extends CloudServiceProvider {
 
   @NonNull Collection<ServiceConfigurationPreparer> servicePreparers();
 
-  @NonNull Optional<ServiceConfigurationPreparer> servicePreparer(@NonNull ServiceEnvironmentType environmentType);
+  @NonNull ServiceConfigurationPreparer servicePreparer(@NonNull ServiceEnvironmentType environmentType);
 
   void addServicePreparer(@NonNull ServiceEnvironmentType type, @NonNull ServiceConfigurationPreparer preparer);
 

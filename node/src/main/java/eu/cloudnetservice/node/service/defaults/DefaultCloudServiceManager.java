@@ -41,8 +41,8 @@ import eu.cloudnetservice.node.service.CloudServiceFactory;
 import eu.cloudnetservice.node.service.CloudServiceManager;
 import eu.cloudnetservice.node.service.ServiceConfigurationPreparer;
 import eu.cloudnetservice.node.service.defaults.config.BungeeConfigurationPreparer;
+import eu.cloudnetservice.node.service.defaults.config.DummyConfigurationPreparer;
 import eu.cloudnetservice.node.service.defaults.config.GlowstoneConfigurationPreparer;
-import eu.cloudnetservice.node.service.defaults.config.MinestomConfigurationPreparer;
 import eu.cloudnetservice.node.service.defaults.config.NukkitConfigurationPreparer;
 import eu.cloudnetservice.node.service.defaults.config.VanillaServiceConfigurationPreparer;
 import eu.cloudnetservice.node.service.defaults.config.VelocityConfigurationPreparer;
@@ -99,7 +99,7 @@ public class DefaultCloudServiceManager implements CloudServiceManager {
     this.addServicePreparer(ServiceEnvironmentType.WATERDOG_PE, new WaterdogPEConfigurationPreparer());
     this.addServicePreparer(ServiceEnvironmentType.MINECRAFT_SERVER, new VanillaServiceConfigurationPreparer());
     this.addServicePreparer(ServiceEnvironmentType.MODDED_MINECRAFT_SERVER, new VanillaServiceConfigurationPreparer());
-    this.addServicePreparer(ServiceEnvironmentType.MINESTOM_SERVER, new MinestomConfigurationPreparer());
+    this.addServicePreparer(ServiceEnvironmentType.MINESTOM_SERVER, new DummyConfigurationPreparer());
     // cluster data sync
     nodeInstance.dataSyncRegistry().registerHandler(
       DataSyncHandler.<ServiceInfoSnapshot>builder()
@@ -246,8 +246,8 @@ public class DefaultCloudServiceManager implements CloudServiceManager {
   }
 
   @Override
-  public @NonNull Optional<ServiceConfigurationPreparer> servicePreparer(@NonNull ServiceEnvironmentType type) {
-    return Optional.ofNullable(this.preparers.get(type));
+  public @NonNull ServiceConfigurationPreparer servicePreparer(@NonNull ServiceEnvironmentType type) {
+    return this.preparers.getOrDefault(type, new DummyConfigurationPreparer());
   }
 
   @Override
